@@ -21,7 +21,7 @@
 	      GPIO_CTRL     = 0x00
         GPIO_MODEL    = 0x04
         GPIO_MODEH    = 0x08
-        GPIO_DOUT     = 0x0c
+        GPIO_DOUT     = 0x0c 
         GPIO_DOUTSET  = 0x10
         GPIO_DOUTCLR  = 0x14
         GPIO_DOUTTGL  = 0x18
@@ -79,4 +79,16 @@
         // System Control Block
 
         SCR = 0xe000ed10
+
+	///////////////////////////////////////////////////////////////////////////
+	//Interrupt generation constants
+
+	GPIO_EXTIPSELL_VALUE = 0x22222222
+	ACTIVATE_INTERRUPT_TRANS = 0xff
+	ENABLE_INTERRUPT = 0x802
+
+	//Enable LEDS constants
+	SET_PINS = 0x55555555
+	SET_LEDS = 0x00000000
+	TWO = 0x2
 
