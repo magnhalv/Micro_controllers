@@ -73,6 +73,7 @@
 
 	/////////////////////////////////////////////////////////////////////////////
 	//
+
 	// Reset handler
   // The CPU will start executing here after a reset
 	//
@@ -90,6 +91,29 @@ _reset:
 	orr r2, r2, r3
 	str r2 , [ r1 , #CMU_HFPERCLKEN0]
 
+	
+
+
+
+	//Set high drive strength
+	ldr r1, gpio_pa_base_address
+	ldr r2, #two_value
+	str r2, [r1, #GPIO_CTRL]
+	
+	//Set pins 8-15 to output
+	ldr r2, set_pins_output_value
+	str r2, [r1, #GPIO_MODEH]
+
+
+	//Enable input
+	ldr r1, gpio_pc_base_address
+	ldr r2, set_pins_input_value
+	str r2, [r1, #GPIO_MODEL]
+	ldr r2, a_interrupt_trans
+	str r2, [r1, #GPIO_DOUT]
+	
+	
+	//Enable interrupt generation
 	ldr r1, gpio_base_address
 	ldr r2, gpio_extipsell_value1
 	str r2, [r1, #GPIO_EXTIPSELL]
@@ -98,22 +122,24 @@ _reset:
 	str r2, [r1, #GPIO_EXTIRISE]
 	str r2, [r1, #GPIO_IEN]
 
+
+	mov r1, #1000
+loop:
+	sub r1, #1
+	cmp r1, #0
+	bne loop
+	//Enable interrupts
 	ldr r1, iser0_address
 	ldr r2, e_interrupt
 	str r2, [r1, #0]
+	
+	b .
+	
 
-	ldr r1, gpio_pa_base_address
-	ldr r2, #two_value
-	str r2, [r1, #GPIO_CTRL]
+	
 
-	ldr r2, set_pins_value
-	str r2, [r1, #GPIO_MODEH]
 
-	ldr r3, [r1, #GPIO_DOUT]
-	mov r2, #0
-	lsl r2, r2, #10
-	orr r3, r3, r2
-	str r3, [r1, #GPIO_DOUT]
+	
 	
 	
 	
@@ -128,14 +154,27 @@ _reset:
 	
         .thumb_func
 gpio_handler:  
-
-	      b .  // do nothing
+	//Set led 10 low
+	ldr r1, gpio_pa_base_address
+	ldr r3, [r1, #GPIO_DOUT]
+	mov r2, #1
+	lsl r2, r2, #10
+	orr r3, r3, r2
+	str r3, [r1, #GPIO_DOUT]
+	//reset interrupt
+	ldr r1, gpio_base_address
+	ldr r2, a_interrupt_trans
+	str r2, [r1, #GPIO_IFC]
+	bx lr  // return
 	
 	/////////////////////////////////////////////////////////////////////////////
 	
         .thumb_func
-dummy_handler:  
+dummy_handler:
+
         b .  // do nothing
+
+
 
 cmu_base_address:
 	.long CMU_BASE
@@ -158,8 +197,14 @@ e_interrupt:
 gpio_pa_base_address:
 	.long GPIO_PA_BASE
 
-set_pins_value:
-	.long SET_PINS
+gpio_pc_base_address:
+	.long GPIO_PC_BASE
+
+set_pins_output_value:
+	.long SET_PINS_OUTPUT
+
+set_pins_input_value:
+	.long SET_PINS_INPUT
 
 set_leds_value:
 	.long SET_LEDS
