@@ -125,11 +125,15 @@ _reset:
 	str r2, [r1, #GPIO_EXTIRISE]
 	str r2, [r1, #GPIO_IEN]
 
+
+
+	
 	//Enable interrupt
 	ldr r1, iser0_address
  	ldr r2, e_interrupt
  	str r2, [r1, #0]
 
+	//Turn off leds
 	ldr r1, gpio_pa_base_address
 	mov r2, #0xff
 	lsl r2, r2, #8
@@ -149,11 +153,15 @@ _reset:
 gpio_handler:
 	ldr r2, gpio_pc_base_address
 	ldr r2, [r2, #GPIO_DIN]
-	add r2, r2, r2
 	ldr r1, gpio_pa_base_address
+//	ror r3, r2, #16
+//	lsr r3, r3, #24
+//	and r3, r2, r3
+	ror r3, r2, #8
 	lsl r2, r2, #8
-	//orr r3, r3, r2
 	str r2, [r1, #GPIO_DOUT]
+	
+	
 	//reset interrupt
 	ldr r1, gpio_base_address
 	ldr r2, a_interrupt_trans
@@ -162,7 +170,15 @@ gpio_handler:
 	
 	/////////////////////////////////////////////////////////////////////////////
 	
-        .thumb_func
+       
+	.thumb_func
+wait_lol:
+	sub r5, #1
+	cmp r5, #0
+	bgt wait_lol
+	bx lr
+	
+	.thumb_func
 dummy_handler:
 
         b .  // do nothing
@@ -201,6 +217,9 @@ set_pins_input:
 
 emu_base_address:
 	.long EMU_BASE
+
+big_number:
+	.long 0x0000000f
 
 
 
