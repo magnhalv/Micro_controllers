@@ -124,7 +124,36 @@ _reset:
 	str r2, [r1, #GPIO_EXTIFALL]
 	str r2, [r1, #GPIO_EXTIRISE]
 	str r2, [r1, #GPIO_IEN]
-str r2, [r1, #GPIO_DOUT]
+
+	//Enable interrupt
+	ldr r1, iser0_address
+ 	ldr r2, e_interrupt
+ 	str r2, [r1, #0]
+
+	ldr r1, gpio_pa_base_address
+	mov r2, #0xff
+	lsl r2, r2, #8
+	str r2, [r1, #GPIO_DOUT]
+
+	b .
+
+
+	/////////////////////////////////////////////////////////////////////////////
+	//
+	// GPIO handler
+	// The CPU will jump here when there is a GPIO interrupt
+	//
+	/////////////////////////////////////////////////////////////////////////////
+
+        .thumb_func
+gpio_handler:
+	ldr r2, gpio_pc_base_address
+	ldr r2, [r2, #GPIO_DIN]
+	add r2, r2, r2
+	ldr r1, gpio_pa_base_address
+	lsl r2, r2, #8
+	//orr r3, r3, r2
+	str r2, [r1, #GPIO_DOUT]
 	//reset interrupt
 	ldr r1, gpio_base_address
 	ldr r2, a_interrupt_trans
