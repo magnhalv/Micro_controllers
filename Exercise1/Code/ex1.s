@@ -1,4 +1,4 @@
-       .syntax unified
+      .syntax unified
 	
 	      .include "efm32gg.s"
 
@@ -97,17 +97,20 @@ _reset:
 
 	//Set high drive strength
 	ldr r1, gpio_pa_base_address
-	ldr r2, #two_value
+	mov r2, #0x2
 	str r2, [r1, #GPIO_CTRL]
 	
 	//Set pins 8-15 to output
-	ldr r2, set_pins_output_value
+	ldr r2, set_pins_output
 	str r2, [r1, #GPIO_MODEH]
+
+
+	
 
 
 	//Enable input
 	ldr r1, gpio_pc_base_address
-	ldr r2, set_pins_input_value
+	ldr r2, set_pins_input
 	str r2, [r1, #GPIO_MODEL]
 	ldr r2, a_interrupt_trans
 	str r2, [r1, #GPIO_DOUT]
@@ -117,50 +120,11 @@ _reset:
 	ldr r1, gpio_base_address
 	ldr r2, gpio_extipsell_value1
 	str r2, [r1, #GPIO_EXTIPSELL]
-	ldr r2, #a_interrupt_trans
+	mov r2, #0xff
 	str r2, [r1, #GPIO_EXTIFALL]
 	str r2, [r1, #GPIO_EXTIRISE]
 	str r2, [r1, #GPIO_IEN]
-
-
-	mov r1, #1000
-loop:
-	sub r1, #1
-	cmp r1, #0
-	bne loop
-	//Enable interrupts
-	ldr r1, iser0_address
-	ldr r2, e_interrupt
-	str r2, [r1, #0]
-	
-	b .
-	
-
-	
-
-
-	
-	
-	
-	
-	
-	
-	/////////////////////////////////////////////////////////////////////////////
-	//
-  // GPIO handler
-  // The CPU will jump here when there is a GPIO interrupt
-	//
-	/////////////////////////////////////////////////////////////////////////////
-	
-        .thumb_func
-gpio_handler:  
-	//Set led 10 low
-	ldr r1, gpio_pa_base_address
-	ldr r3, [r1, #GPIO_DOUT]
-	mov r2, #1
-	lsl r2, r2, #10
-	orr r3, r3, r2
-	str r3, [r1, #GPIO_DOUT]
+str r2, [r1, #GPIO_DOUT]
 	//reset interrupt
 	ldr r1, gpio_base_address
 	ldr r2, a_interrupt_trans
@@ -183,7 +147,7 @@ gpio_base_address:
 	.long GPIO_BASE
 
 gpio_extipsell_value1:
-	.long GPIO_EXTIPSELL_VALUE
+	.long 0x22222222
 
 iser0_address:
 	.long ISER0
@@ -192,7 +156,7 @@ a_interrupt_trans:
 	.long ACTIVATE_INTERRUPT_TRANS
 
 e_interrupt:	
-	.long ENABLE_INTERRUPT
+	.long 0x802
 
 gpio_pa_base_address:
 	.long GPIO_PA_BASE
@@ -200,17 +164,15 @@ gpio_pa_base_address:
 gpio_pc_base_address:
 	.long GPIO_PC_BASE
 
-set_pins_output_value:
-	.long SET_PINS_OUTPUT
+set_pins_output:
+	.long 0x55555555
 
-set_pins_input_value:
-	.long SET_PINS_INPUT
+set_pins_input:
+	.long 0x33333333
 
-set_leds_value:
-	.long SET_LEDS
+emu_base_address:
+	.long EMU_BASE
 
-two_value:
-	.long TWO
 
 
 

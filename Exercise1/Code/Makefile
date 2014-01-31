@@ -11,7 +11,7 @@ ASFLAGS=-mcpu=cortex-m3 -mthumb -g
 
 LINKERSCRIPT=efm32gg.ld
 
-all	: ex1.bin upload
+all	: clean ex1.bin upload
 
 ex1.bin : ex1.elf
 	${OBJCOPY} -j .text -O binary $< $@
