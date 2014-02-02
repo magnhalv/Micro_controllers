@@ -151,15 +151,25 @@ _reset:
 
         .thumb_func
 gpio_handler:
-	ldr r2, gpio_pc_base_address
-	ldr r2, [r2, #GPIO_DIN]
-	ldr r1, gpio_pa_base_address
+	ldr r1, gpio_pc_base_address
+	ldr r1, [r1, #GPIO_DIN]
+	
 //	ror r3, r2, #16
 //	lsr r3, r3, #24
 //	and r3, r2, r3
+	mov r4, #0xef
+	push {r4}
+	bl invert_byte
+	pop {r4}
+	ror r5, r4, #8
+	lsr r5, r5, #24
 	ror r3, r2, #8
+	lsr r3, r3, #24
+	and r2, r2, r3
 	lsl r2, r2, #8
-	str r2, [r1, #GPIO_DOUT]
+	
+	ldr r1, gpio_pa_base_address
+	str r5, [r1, #GPIO_DOUT]
 	
 	
 	//reset interrupt
@@ -172,11 +182,27 @@ gpio_handler:
 	
        
 	.thumb_func
-wait_lol:
-	sub r5, #1
-	cmp r5, #0
-	bgt wait_lol
+	
+invert_byte:
+	pop {r1}
+	pop {r1}
+	mov r3, #0
+	mov r4, #0
+	mov r5, #31
+invert_byte_loop:
+	ror r2, r1, #1
+	lsr r1, r1, #1
+	lsr r2, r2, r5
+	add r3, r2, r3
+	add r4, r4, #1
+	sub r5, r5, r4
+	cmp r4, #8
+	bne invert_byte_loop
+	push {r3}
 	bx lr
+	
+	
+	
 	
 	.thumb_func
 dummy_handler:
