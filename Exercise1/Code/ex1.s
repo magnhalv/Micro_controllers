@@ -112,7 +112,7 @@ _reset:
 	ldr r1, gpio_pc_base_address
 	ldr r2, set_pins_input
 	str r2, [r1, #GPIO_MODEL]
-	ldr r2, a_interrupt_trans
+	mov r2, #0xff
 	str r2, [r1, #GPIO_DOUT]
 	
 	
@@ -130,7 +130,7 @@ _reset:
 	
 	//Enable interrupt
 	ldr r1, iser0_address
- 	ldr r2, e_interrupt
+ 	ldr r2, enable_interrupt
  	str r2, [r1, #0]
 
 	//Turn off leds
@@ -139,6 +139,10 @@ _reset:
 	lsl r2, r2, #8
 	str r2, [r1, #GPIO_DOUT]
 
+	ldr r1, emu_base_address
+	mov r2, #0x3
+	str r2, [r1, #EMU_CTRL]
+	
 	b .
 
 
@@ -153,28 +157,24 @@ _reset:
 gpio_handler:
 	ldr r1, gpio_pc_base_address
 	ldr r1, [r1, #GPIO_DIN]
-	
+	mov r6, r1
 //	ror r3, r2, #16
 //	lsr r3, r3, #24
 //	and r3, r2, r3
-	mov r4, #0xef
-	push {r4}
+	push {lr, r1}
+	push {r1}
 	bl invert_byte
-	pop {r4}
-	ror r5, r4, #8
-	lsr r5, r5, #24
-	ror r3, r2, #8
-	lsr r3, r3, #24
-	and r2, r2, r3
-	lsl r2, r2, #8
+	pop {r1, r2, lr}
+	and r1, r1, r2
+	lsl r1, r1, #8
 	
-	ldr r1, gpio_pa_base_address
-	str r5, [r1, #GPIO_DOUT]
+	ldr r2, gpio_pa_base_address
+	str r1, [r2, #GPIO_DOUT]
 	
 	
 	//reset interrupt
 	ldr r1, gpio_base_address
-	ldr r2, a_interrupt_trans
+	mov r2, #0xff
 	str r2, [r1, #GPIO_IFC]
 	bx lr  // return
 	
@@ -185,18 +185,15 @@ gpio_handler:
 	
 invert_byte:
 	pop {r1}
-	pop {r1}
 	mov r3, #0
-	mov r4, #0
-	mov r5, #31
+	mov r4, #24
 invert_byte_loop:
 	ror r2, r1, #1
 	lsr r1, r1, #1
-	lsr r2, r2, r5
+	lsr r2, r2, r4
 	add r3, r2, r3
 	add r4, r4, #1
-	sub r5, r5, r4
-	cmp r4, #8
+	cmp r4, #32
 	bne invert_byte_loop
 	push {r3}
 	bx lr
@@ -223,10 +220,7 @@ gpio_extipsell_value1:
 iser0_address:
 	.long ISER0
 
-a_interrupt_trans:
-	.long ACTIVATE_INTERRUPT_TRANS
-
-e_interrupt:	
+enable_interrupt:
 	.long 0x802
 
 gpio_pa_base_address:
@@ -244,8 +238,6 @@ set_pins_input:
 emu_base_address:
 	.long EMU_BASE
 
-big_number:
-	.long 0x0000000f
 
 
 
