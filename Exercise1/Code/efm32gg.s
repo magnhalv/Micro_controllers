@@ -45,8 +45,14 @@
         CMU_BASE = 0x400c8000
 
         CMU_HFPERCLKDIV = 0x008
+	CMU_HFCORECLKEN0 = 0x40
         CMU_HFPERCLKEN0 = 0x044
+	CMU_LFACLKEN0 = 0x58
 
+	CMU_HFCORECLKEN0_LE = 4
+
+	CMU_LFACLKEN0_LETIMER0 = 2
+	
         CMU_HFPERCLKEN0_GPIO = 13
 
 	      //////////////////////////////////////////////////////////////////////
@@ -82,18 +88,24 @@
         SCR = 0xe000ed10
 
 	///////////////////////////////////////////////////////////////////////////
-	//Interrupt generation constants
+	// Low enery counter
+	LETIMER0_BASE = 0x40082000
+		LETIMER0_CTRL = 0x000
+		LETIMER0_CMD = 0x004
+		LETIMER0_STATUS = 0x008
+		LETIMER0_CNT = 0x00C
+		LETIMER0_COMP0 = 0x010
+		LETIMER0_COMP1 = 0x014
+		LETIMER0_REP0 = 0x018
+		LETIMER0_REP1 = 0x01C
+		LETIMER0_IF = 0x020
+		LETIMER0_IFS = 0x024
+		LETIMER0_IFC = 0x028
+		LETIMER0_IEN = 0x02C
+		LETIMER0_FREEZE = 0x030
+		LETIMER0_SYNCBUSY = 0x034
+		LETIMER0_ROUTE = 0x038
+		
 
-	GPIO_EXTIPSELL_VALUE = 0x22222222
-	ACTIVATE_INTERRUPT_TRANS = 0xff
-	ENABLE_INTERRUPT = 0x802
 
-	//Enable LEDS constants
-	SET_PINS_OUTPUT = 0x55555555
-	SET_LEDS = 0x11111111
-	TWO = 0x2
-
-	//Enable input
-	SET_PINS_INPUT = 0x33333333
-	LOL = 0xff
 

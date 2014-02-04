@@ -55,7 +55,7 @@
 	      .long   dummy_handler
 	      .long   dummy_handler
 	      .long   dummy_handler
-	      .long   dummy_handler
+	      .long   letimer0_handler
 	      .long   dummy_handler
 	      .long   dummy_handler
 	      .long   dummy_handler
@@ -83,7 +83,7 @@
 	      .type   _reset, %function
         .thumb_func
 _reset:
-	//Enable GPIO
+	//Enable GPIO clock
 	ldr r1, cmu_base_address
 	ldr r2, [r1, #CMU_HFPERCLKEN0]
 	mov r3, #1
@@ -91,7 +91,20 @@ _reset:
 	orr r2, r2, r3
 	str r2 , [ r1 , #CMU_HFPERCLKEN0]
 
-	
+	//Enable LE clock
+	ldr r1, cmu_base_address
+	ldr r2, [r1, #CMU_HFCORECLKEN0]
+	mov r3, #1
+	lsl r3, r3, #CMU_HFCORECLKEN0_LE
+	orr r2, r2, r3
+	str r2 , [ r1 , #CMU_HFCORECLKEN0]
+
+	//Enable LETIMER0 clock
+	ldr r2, [r1, #CMU_LFACLKEN0]
+	mov r3, #1
+	lsl r3, r3, #CMU_LFACLKEN0_LETIMER0
+	orr r2, r2, r3
+	str r2, [r1, #CMU_LFACLKEN0]
 
 
 
@@ -105,7 +118,11 @@ _reset:
 	str r2, [r1, #GPIO_MODEH]
 
 
-	
+	//Turn off leds
+	ldr r1, gpio_pa_base_address
+	mov r2, #0xff
+	lsl r2, r2, #8
+	str r2, [r1, #GPIO_DOUT]
 
 
 	//Enable input
@@ -130,14 +147,10 @@ _reset:
 	
 	//Enable interrupt
 	ldr r1, iser0_address
- 	ldr r2, enable_interrupt
+ 	ldr r2, enable_interrupts
  	str r2, [r1, #0]
 
-	//Turn off leds
-	ldr r1, gpio_pa_base_address
-	mov r2, #0xff
-	lsl r2, r2, #8
-	str r2, [r1, #GPIO_DOUT]
+
 
 	ldr r1, emu_base_address
 	mov r2, #0x3
@@ -155,32 +168,61 @@ _reset:
 
         .thumb_func
 gpio_handler:
+	//Get button status. 
 	ldr r1, gpio_pc_base_address
 	ldr r1, [r1, #GPIO_DIN]
-	mov r6, r1
-//	ror r3, r2, #16
-//	lsr r3, r3, #24
-//	and r3, r2, r3
+
+	//Invert the button status byte
 	push {lr, r1}
 	push {r1}
 	bl invert_byte
 	pop {r1, r2, lr}
+
+	//Combine the two bytes, thus setting the complementary LEDs low.
 	and r1, r1, r2
 	lsl r1, r1, #8
-	
+
+	//Set leds
 	ldr r2, gpio_pa_base_address
 	str r1, [r2, #GPIO_DOUT]
+
+
+	//TIMER TEST
+
+	
+	
+	//set comp
+	ldr r1, letimer0_base_address
+	mov r2, #5
+	str r2, [r1, #LETIMER0_COMP0]
+	mov r2, #0
+	str r2, [r1, #LETIMER0_COMP1]
+
+	//Enable interrupt
+	mov r2, #2
+	str r2, [r1, #LETIMER0_IEN]
+	
+	//start timer
+	mov r2, #1
+	str r2, [r1, #LETIMER0_CMD]
 	
 	
 	//reset interrupt
 	ldr r1, gpio_base_address
 	mov r2, #0xff
 	str r2, [r1, #GPIO_IFC]
-	bx lr  // return
+	bx lr 
 	
 	/////////////////////////////////////////////////////////////////////////////
 	
-       
+
+	.thumb_func
+letimer0_handler:
+	ldr r1, gpio_pa_base_address
+	mov r2, #0xff
+	lsl r2, r2, #8
+	str r2, [r1, #GPIO_DOUT]
+	b .
 	.thumb_func
 	
 invert_byte:
@@ -237,6 +279,12 @@ set_pins_input:
 
 emu_base_address:
 	.long EMU_BASE
+
+letimer0_base_address:
+	.long LETIMER0_BASE
+
+enable_interrupts:
+	.long 0x2000802
 
 
 
