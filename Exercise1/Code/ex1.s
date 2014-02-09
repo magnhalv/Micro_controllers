@@ -83,6 +83,7 @@
 	      .type   _reset, %function
         .thumb_func
 _reset:
+	///////CLOCK CONFIGURATIONS/////////
 	//Enable GPIO clock
 	ldr r1, cmu_base_address
 	ldr r2, [r1, #CMU_HFPERCLKEN0]
@@ -106,17 +107,17 @@ _reset:
 	orr r2, r2, r3
 	str r2, [r1, #CMU_LFACLKEN0]
 
+	//Set the ULFRCO (1 kHz) as clock source for LETIMER0, to save energy.
+	ldr r2, [r1, #CMU_LFCLKSEL]
+	lsr r2, #2
+	lsl r2, #2
+	mov r3, #1
+	lsl r3, r3, CMU_LFCLKSEL_LFAE
+	orr r3, r2, r3
+	str r3, [r1, #CMU_LFCLKSEL]
 	
-	ldr r2, [r1, #0x028]
-	add r2, #2
-	str r2, [r1, #0x028]
 
-	//Set frequency
-	mov r2, #0
-	str r2, [r1, #0x68]
-	
-
-
+	/////// I/O CONFIGURATIONS ///////
 
 	//Set high drive strength
 	ldr r1, gpio_pa_base_address
@@ -135,15 +136,16 @@ _reset:
 	str r2, [r1, #GPIO_DOUT]
 
 
-	//Enable input
+	//Enable gpio_pc input
 	ldr r1, gpio_pc_base_address
 	ldr r2, set_pins_input
 	str r2, [r1, #GPIO_MODEL]
 	mov r2, #0xff
 	str r2, [r1, #GPIO_DOUT]
 	
-	
-	//Enable interrupt generation
+
+	//////// INTERRUPT CONFIGURATIONS ///////
+	//Enable interrupt generation on falling 
 	ldr r1, gpio_base_address
 	ldr r2, gpio_extipsell_value1
 	str r2, [r1, #GPIO_EXTIPSELL]
@@ -152,21 +154,44 @@ _reset:
 //	str r2, [r1, #GPIO_EXTIRISE]
 	str r2, [r1, #GPIO_IEN]
 
-
-
-	
-	//Enable interrupt
+	//Enable gpio interrupt
 	ldr r1, iser0_address
  	ldr r2, enable_interrupts
  	str r2, [r1, #0]
 
+	/////// LETIMER0 CONFIGURATIONS ///////
+	//set comp0 top value and buffered mode
+	ldr r1, letimer0_base_address
+	mov r2, #1
+	lsl r2, r2, #9
+	ldr r3, [r1, #LETIMER0_CTRL]
+	orr r3, r2, r3
+	add r3, r3, #2
+	str r3, [r1, #LETIMER0_CTRL]
+
+	//Set buffered values
+	mov r7, #0x8 //Counter for nof timer interrupts
+	mov r2, #0x01
+	str r2, [r1, #LETIMER0_REP0]
+	str r2, [r1, #LETIMER0_REP1]
+
+	
+	//Set top value and compare
+	ldr r2, =0x00FF
+	str r2, [r1, #LETIMER0_COMP0]
+
+	//Enable interrupt
+	mov r2, #0x08
+	str r2, [r1, #LETIMER0_IEN]
+
 
 
 	ldr r1, emu_base_address
-	mov r2, #0x3
-	str r2, [r1, #EMU_CTRL]
 	
-	b .
+
+forever_loop:	
+	WFI
+	b forever_loop
 
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -179,9 +204,13 @@ _reset:
         .thumb_func
 gpio_handler:
 
+	//Stop timer, in case it's running. 
 	ldr r1, letimer0_base_address
 	mov r2, #2
 	str r2, [r1, #LETIMER0_CMD]
+
+	//Set initial LEDS //
+
 	//Get button status. 
 	ldr r1, gpio_pc_base_address
 	ldr r1, [r1, #GPIO_DIN]
@@ -199,44 +228,21 @@ gpio_handler:
 	//Set leds
 	ldr r2, gpio_pa_base_address
 	str r1, [r2, #GPIO_DOUT]
-	mov r6, r1
-	add r6, r6, #0xff
+	mov r6, r1 //Store value for later. Used in letimer0_handler
+	add r6, r6, #0xff //Add for easier shifting of leds
 
 
-	//TIMER TEST
+	//Start timer. Should cause 8 interrupts, which will be used to shift the leds to
+	//the right on the board.
 
-	
+	mov r7, #0x8 //Counter for nof timer interrupts
 
-	//set comp0 top value
+	//Start and clear letimer0
 	ldr r1, letimer0_base_address
-	mov r2, #1
-	lsl r2, r2, #9
-	ldr r3, [r1, #LETIMER0_CTRL]
-	orr r3, r2, r3
-	add r3, r3, #2
-	str r3, [r1, #LETIMER0_CTRL]
-
-	//Set buffered values mode
-	mov r7, #0x8 //Counter
-	mov r2, #0xFF
-	str r2, [r1, #LETIMER0_REP0]
-	str r2, [r1, #LETIMER0_REP1]
-
-	
-	//Set timers
-	ldr r2, =0x3333
-	str r2, [r1, #LETIMER0_COMP0]
-	mov r2, #0
-	str r2, [r1, #LETIMER0_COMP1]
-
-	//Enable interrupt
-	mov r2, #0x08
-	str r2, [r1, #LETIMER0_IEN]
-	//Start and clear
 	mov r2, #5
 	str r2, [r1, #LETIMER0_CMD]
 
-	//reset interrupt
+	//reset gpio interrupt
 	ldr r1, gpio_base_address
 	mov r2, #0xff
 	str r2, [r1, #GPIO_IFC]
@@ -248,36 +254,31 @@ gpio_handler:
 
 	.thumb_func
 letimer0_handler:
-
-	
-//	ldr r5, letimer0_base_address
-//	ldr r4, [r5, #LETIMER0_REP0]
-//	cmp r4, #0
-//	bgt letimer0_handler_return
-//	ldr r4, gpio_pc_base_address
-//	ldr r5, [r4, #GPIO_DIN]
-	sub r7, r7, #1
+	sub r7, r7, #1 //decrement number of interrupts
 	cmp r7, #1
 	ble dont_update_REP1
+	//Write to REP1, so another interrupt will happen.
 	ldr r8, letimer0_base_address
-	mov r4, #0xff
+	mov r4, #0x01
 	str r4, [r8, #LETIMER0_REP1]
-dont_update_REP1:	
+dont_update_REP1:
+	//Shift the LEDS to the right on the board.
 	lsl r6, r6, #1
 	ldr r4, gpio_pa_base_address
 	str r6, [r4, #GPIO_DOUT]
 	add r6, r6, #1
 
+	//Clear letimer0 interrupt.
 	ldr r8, letimer0_base_address
 	mov r7, #0x08
 	str r7, [r8, #LETIMER0_IFC]
-	
-
 	bx lr
-	.thumb_func
+
+	////////////////////////////////////////////////////////////////////////////
 	
+	.thumb_func	
 revert_byte:
-	pop {r1}
+	pop {r1} //pop parameter
 	mov r3, #0
 	mov r4, #24
 revert_byte_loop:
@@ -288,18 +289,14 @@ revert_byte_loop:
 	add r4, r4, #1
 	cmp r4, #32
 	bne revert_byte_loop
-	push {r3}
+	push {r3} //push return value
 	bx lr
 	
 	
-	
+	/////////////////////////////////////////////////////////////////////////////
 	
 	.thumb_func
 dummy_handler:
-	ldr r1, gpio_pa_base_address
-	mov r2, #0xee
-	lsl r2, r2, #8
-	str r2, [r1, #GPIO_DOUT]
         b .  // do nothing
 
 

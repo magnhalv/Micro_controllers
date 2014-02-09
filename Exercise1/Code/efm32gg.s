@@ -45,6 +45,7 @@
         CMU_BASE = 0x400c8000
 
         CMU_HFPERCLKDIV = 0x008
+	CMU_LFCLKSEL = 0x028
 	CMU_HFCORECLKEN0 = 0x40
         CMU_HFPERCLKEN0 = 0x044
 	CMU_LFACLKEN0 = 0x58
@@ -54,6 +55,8 @@
 	CMU_LFACLKEN0_LETIMER0 = 2
 	
         CMU_HFPERCLKEN0_GPIO = 13
+
+	CMU_LFCLKSEL_LFAE = 16
 
 	      //////////////////////////////////////////////////////////////////////
 	      // NVIC
