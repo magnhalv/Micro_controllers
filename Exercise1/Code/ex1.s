@@ -144,7 +144,7 @@ _reset:
 	str r2, [r1, #GPIO_DOUT]
 	
 
-	//////// INTERRUPT CONFIGURATIONS ///////
+	//////// GPIO INTERRUPT CONFIGURATIONS ///////
 	//Enable interrupt generation on falling 
 	ldr r1, gpio_base_address
 	ldr r2, gpio_extipsell_value1
@@ -170,7 +170,6 @@ _reset:
 	str r3, [r1, #LETIMER0_CTRL]
 
 	//Set buffered values
-	mov r7, #0x8 //Counter for nof timer interrupts
 	mov r2, #0x01
 	str r2, [r1, #LETIMER0_REP0]
 	str r2, [r1, #LETIMER0_REP1]
@@ -184,9 +183,6 @@ _reset:
 	mov r2, #0x08
 	str r2, [r1, #LETIMER0_IEN]
 
-
-
-	ldr r1, emu_base_address
 	
 
 forever_loop:	
@@ -204,10 +200,10 @@ forever_loop:
         .thumb_func
 gpio_handler:
 
-	//Stop timer, in case it's running. 
-	ldr r1, letimer0_base_address
-	mov r2, #2
-	str r2, [r1, #LETIMER0_CMD]
+	//Clear gpio interrupt
+	ldr r1, gpio_base_address
+	mov r2, #0xff
+	str r2, [r1, #GPIO_IFC]
 
 	//Set initial LEDS //
 
@@ -237,15 +233,15 @@ gpio_handler:
 
 	mov r7, #0x8 //Counter for nof timer interrupts
 
-	//Start and clear letimer0
+
+	//Stop timer, in case it's running. 
 	ldr r1, letimer0_base_address
+	mov r2, #2
+	str r2, [r1, #LETIMER0_CMD]
+	//Start and clear letimer0
 	mov r2, #5
 	str r2, [r1, #LETIMER0_CMD]
 
-	//reset gpio interrupt
-	ldr r1, gpio_base_address
-	mov r2, #0xff
-	str r2, [r1, #GPIO_IFC]
 	
 	bx lr 
 	

@@ -1,9 +1,28 @@
-\section{Results}\label{chapter:Results}
-This section covers the testing and simulation of the implemented
-modules, using ModelSim. All the testing was done with VHDL
-test benches, by either using assertions on expected values, or 
-manually following signals on the more complex modules.
+\section{Results}\label{chapter:Results and Tests}
 
-\input{results/testing}
-\input{results/comparison}
-\input{results/programming}
+This section covers the testing of the program, the resulting functionality of the program and its power consumption.
+
+\subsection{Result}
+
+\subsubsection{Functionality}
+The final version of the program works as follows:
+
+\begin{itemize}
+	\item When you press a button(s), the respective LED and its complement will light up.
+	\item The timer is enabled upon a GPIO interrupt, and will count down to zero eight times.
+	\item Every time the timer reaches zero, the lighted LEDs are shifted one LED to the right. 
+\end{itemize}
+
+\subsubsection{Power consumption}
+
+Without any power optimizations the program used 4.3 mA. By putting the processor to sleep by using the WFI instruction this number was lowered to 1.5 mA. Finally, by setting the LETIMER0 clock source to ULFRCO we managed to lower the energy usage to 1.4 mA. 
+
+\subsection{Testing}
+
+The testing of the program was either done manually (pressing buttons and observe the result) or with GDB. The general method was testing manually to see if the program did what we intended. If this failed, and there were no obvious reasons for this, we debugged with GDB by reading the values of critical registers. 
+
+Power consumption was tested by reading the energy usage of the board, using the built-in energy meter.
+
+
+
+

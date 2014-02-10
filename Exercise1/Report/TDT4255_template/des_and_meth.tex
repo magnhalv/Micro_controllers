@@ -1,0 +1,117 @@
+\section{Description and Methodology}\label{chapter:Description and Methodology}
+This section covers how the assignment was solved. This was done in the following steps:
+
+\begin{itemize}
+	\item Upload provided test program to the board.
+	\item Turn on a LED upon startup. 
+	\item Enable simple interrupts.
+	\item Read input from the buttons upon a interrupt, and set LEDs accordingly. 
+	\item Manipulate the input for more advanced LED patterns.
+	\item Manipulate the input by using a countdown timer.
+	\item Reduce the power consumed. 
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Upload provided test program to the board}
+
+The first thing we had to do in order to familiarize ourself with the system was by simply 
+loading a provided .bit file to the board. This was done by using the program eACommander to
+flash the board, which provided a simple LED manipulation program. 
+
+Afterwards we uploaded the provided framework to the board. The provided makefile contained 
+commands to assemble, link and upload the program. In order to make development faster and easier, we added an \textit{make all} command to the makefile, which executed all the mentioned commands. 
+
+\subsection{Turn on a LED upon startup}
+
+Now as we had managed to upload our program to the microcontroller, we figured the best way to see
+if we understood the system was to make the LEDs light up upon start up. 
+
+This was really straight forward, since we were provided with a guide in the compendium:
+
+\begin{itemize}
+ 	\item 	Enable the general-purpose input/output (GPIO) clock, which was done by writing to the high frequency peripheral clock register (HFPERCLKEN0) in the clock manangement unit (CMU). 
+ 	\item 	Set high drive strength to port A, which controls the LEDs, by writing to the GPIO\_PA\_CTRL register.
+ 	\item 	Enable pin 8-15 in port A for output, by writing to the GPIO\_PA\_MODEH register.
+ 	\item 	Activate the LEDs by setting the register GPIO\_PA\_DOUT to low. 
+\end{itemize}
+
+\subsection{Enable simple interrupts}
+
+Now as we got the LEDs to light up we decided to manipulate the LEDs by using the buttons, thus we had to enable interrupts. Again the compendium provided us with an direct guide:
+
+\begin{itemize}
+	\item Setting the input port for external interrupts to port C, by writing 0x22222222 to the GPIO\_EXTIPSELL register. 
+	\item Enable interrupts to happen when input pin 0-7 goes low (i.e. when a button is pressed down), by writing 0xff to GPIO\_EXITFALL. 
+	\item Enable interrupt generation on pin 0-7, by writing 0xff to GPIO\_IEN.
+	\item Enable the handlers in the exception vector table by writing 0x802 to the ISER0 registry. 
+	\item Clear the interrupt by writing 0xff to GPIO\_IFC in the interrupt handler, so the interrupt handler will not be repeatedly called.
+\end{itemize}
+
+We then moved the code which turned on the LEDs to the gpio\_handler, and saw that they lightened up upon a button press.
+
+\subsection{Read input from the buttons upon a interrupt, and set LEDs accordingly}
+
+With the interrupt handler working correctly, we now wanted to extend the handler to lighten up LEDs when their respective button was pressed. This was simply done by reading from port C's GPIO\_DIN register (from now on we will denote port X's GPIO with GPIO\_PX). Since the buttons are connected to pin
+0-7, and the LEDs are connected to pin 8-15, we had to left shift the value in GPIO\_DIN by eight bits. After that we simply wrote the result to GPIO\_PA\_DOUT register, setting the respective LED. 
+
+\subsection{Manipulate the input for more advanced LED patterns}
+
+Since the program now provided the minimum needed features to satisfiy the assignment, we now wanted to manipulate the input byte to more a more complex pattern. Thus, when you pushed a button the respective LED should lighten up, and the complementary LED. E.g. if you pushed button one, LED one and eight should lighten up, and if you pushed button five, LED four and five to lighten up. 
+
+To do this we added a function called reverse\_byte. This function takes one 32-bit value as input, and reverses the first 8 bits. E.g. if the first 8 bits are 11010000, the function outputs 00001011. 
+
+The value from the GPIO\_PC\_DIN register is used as input to the function, and then the output value and the original value are logically and'ed. The result is then left shifted eight bits, and written to GPIO\_PA\_DOUT. 
+
+The algorithm in reverse\_byte took a bit more effort to develop, and the GNU debugger (GDB) was used extensively to read the registers and see how the different instructions manipulated the bits. The algorithm works as follows:
+
+\begin{enumerate}
+	\item Put the original value into r1.
+	\item Iterate through step 3-6 eight times.
+	\item Rotate right the original value one bit into r2.
+	\item Right shift the orginal value.
+	\item Right shift r2 (32 - number of iterations) bits.
+	\item Add the value to r3.
+	\item return r3
+\end{enumerate}
+
+\subsection{Manipulate the input by using a countdown timer} 
+
+Another extension we wished to add to the program was to control the LEDs with a timer. We decided to program it so that when you pushed a button the respective LED and its complement LED should light up, and then for every timer interval the active LEDs should be shifted one to the right - until it reached the end of the line of LEDs. 
+
+In order to do this we had to use one of the built in timers on the microcontroller. We decided to use the Low Energy Timer (LETIMER0), in order to use as little power as possible. It took a lot of work to get
+the timer working, and much of the effort was spent reading and understanding the EF32GG reference manual. GDB was also used extensively to confirm and deconfirm our understanding of how the timer worked by reading various register values.
+
+The program was implemented by enabling the timer in the gpio\_handler every time a button is pressed and saving the LEDs status in a global register. So every time the counter reached zero, we shifted the 
+register containing the LEDs status one bit to the left and writing it to the GPIO\_PA\_DOUT register. When the timer reached zero after the eight time we stoppped it. 
+
+In order to use the timer we had to do the following steps:
+
+\begin{itemize}
+	\item Enable the Low Energy clock in the CMU\_HFCORECLKEN0 register.
+	\item Enable LETIMER0 clock in the CMU\_LFACLKEN0 register. 
+	\item Set the ULFRCO as the clock source for LETIMER0, by writing to the CMU\_LFCLKSEL register. 
+	\item Set COMP0 as top value (the value the timer starts at) and enable buffered mode in the LETIMER0\_CTRL register.
+	\item Write 0x1 to LETIMER0\_REP0 and LETIMER0\_REP1.
+	\item Enable interrupt for when REP0 reaches zero. 
+	\item Set the top value by writing it to LETIMER0\_COMP0. 
+	\item Start the timer when a GPIO interrupt occurs. 
+\end{itemize}
+
+With this setup the timer is reset to the top value every time it reaches zero, as long LETIMER0\_REP1 is written to in each interval. Thus in the LETIMER0 interrupt handler will have to check a global
+counter to see if the timer have counted down eight times. We used a global register for this.
+
+\subsection{Reduce the power consumed}
+
+We used three main strategies to reduce the power consumed:
+
+\begin{itemize}
+	\item Use interrupts, instead of letting the processor constantly check which buttons are pressed.
+	\item Using the Low Energy Timer as timer, and connecting it to the ULFRCO clock, which uses very little energy.
+	\item When the processor is done handling an interrupt, it executes the Wait For Interrupt (WFI) instruction. Putting it in sleep mode until an interrupt occurs. 
+\end{itemize}
+
+
+
+
+

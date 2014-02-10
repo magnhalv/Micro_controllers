@@ -1,34 +1,7 @@
 \section{Conclusion}
-We always strive to make processors as efficient as possible, and an
-important step in this process is to add a pipeline to the processor.
+All of the requirements given by the assignment has been fulfilled. The described program allows you to manipulate the LEDs by pressing the buttons on the gamepad. We have also extended the program with extra functionality, which included a more complex LED pattern and changing the pattern on invervals using a countdown timer. Interrupts are activated for both GPIO events and timer events, thus allows the processor to do other operations instead of constantly polling the GPIO and timer. 
+We have also designed the program to be as power efficient as possible, by letting the processor sleep while waiting for interrupts and using the Low Energy Timer for countdown timing. 
 
-We have implemented all the components and logic required by the specification 
-of the assignment. Everything worked during the simulation in ModelSim.
-The pipeline made for quite a lot of synchronization issues that had to be
-considered and made for a lot of debugging, but satisfying results in the
-end.
+An improvement that could be made to the program, is removing the use of global values. When keeping track of the number of timer interrupts we save it in register 7, and hope that it will not be used somewhere else in the program. While this works in the programs current state, it is not good design if the program is to be extended with more functionality. 
 
-We saw that the pipelined processors performance greatly out matched the 
-multi cycle processor from the first exercise. Thus we can conclude that this 
-implementation have been a success. It is very motivating to see that all the
-work put into the exercises makes for such satisfying results. 
-
-It has been a lot of hard work, that has provided us with a lot of insight
-in the complexity of designing a pipelined processor. Designing such 
-a processor is a very complex task that requires a lot of work, testing and 
-a great understanding in how the different components \textit{actually} 
-work together. 
-
-The course and its exercises has also given us a greater understanding of how a 
-computer work at a much lower level than we have previously thought of,
-when working on other computer-related
-problems like e.g. software development for embedded devices, or even higher
-level system programming. Even if we do not \textit{have} to take the processor
-architecture into account when designing a software system, it is certain
-that an understanding of \textit{how}
-it works at lower abstraction levels can help when 
-optimizing arbitrary problems.
-
-All taken into considerations, we can say that the exercises in this
-course has given us a great insight in processors and computer architecture,
-VHDL coding and design of logical circuits. 
+But we are quite satisfied with the resulting program. Making it have given us a lot of insight on the EF32GG architecture, given us a basis for low-level coding and reasoning, and how to read reference manuals for computer components. 

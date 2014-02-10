@@ -1,0 +1,17 @@
+\contentsline {section}{\numberline {1}Introduction}{4}
+\contentsline {subsection}{\numberline {1.1}Assignment}{4}
+\contentsline {section}{\numberline {2}Description and Methodology}{6}
+\contentsline {subsection}{\numberline {2.1}Upload provided test program to the board}{6}
+\contentsline {subsection}{\numberline {2.2}Turn on a LED upon startup}{6}
+\contentsline {subsection}{\numberline {2.3}Enable simple interrupts}{7}
+\contentsline {subsection}{\numberline {2.4}Read input from the buttons upon a interrupt, and set LEDs accordingly}{7}
+\contentsline {subsection}{\numberline {2.5}Manipulate the input for more advanced LED patterns}{7}
+\contentsline {subsection}{\numberline {2.6}Manipulate the input by using a countdown timer}{8}
+\contentsline {subsection}{\numberline {2.7}Reduce the power consumed}{9}
+\contentsline {section}{\numberline {3}Results}{10}
+\contentsline {subsection}{\numberline {3.1}Result}{10}
+\contentsline {subsubsection}{\numberline {3.1.1}Functionality}{10}
+\contentsline {subsubsection}{\numberline {3.1.2}Power consumption}{10}
+\contentsline {subsection}{\numberline {3.2}Testing}{10}
+\contentsline {section}{\numberline {4}Feedback}{11}
+\contentsline {section}{\numberline {5}Conclusion}{12}
