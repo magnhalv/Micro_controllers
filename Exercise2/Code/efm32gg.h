@@ -47,17 +47,26 @@
 
 #define CMU_BASE2 0x400c8000
 
-#define CMU_HFPERCLKDIV  ((volatile uint32_t*)(CMU_BASE2 + 0x008))
-#define CMU_HFCORECLKEN0 ((volatile uint32_t*)(CMU_BASE2 + 0x040))
-#define CMU_HFPERCLKEN0  ((volatile uint32_t*)(CMU_BASE2 + 0x044))
-#define CMU_CMD          ((volatile uint32_t*)(CMU_BASE2 + 0x024))
+#define CMU_HFPERCLKDIV  	((volatile uint32_t*)(CMU_BASE2 + 0x008))
+#define CMU_HFCORECLKEN0 	((volatile uint32_t*)(CMU_BASE2 + 0x040))
+#define CMU_HFPERCLKEN0  	((volatile uint32_t*)(CMU_BASE2 + 0x044))
+#define CMU_CMD          	((volatile uint32_t*)(CMU_BASE2 + 0x024))
+#define CMU_LFACLKEN0    	((volatile uint32_t*)(CMU_BASE2 + 0x058))
+#define CMU_LFCLKSEL		((volatile uint32_t*)(CMU_BASE2 + 0x028))
+
 
 #define CMU2_HFPERCLKEN0_DAC0   (1 << 17)
 #define CMU2_HFPERCLKEN0_PRS    (1 << 15)
 #define CMU2_HFPERCLKEN0_GPIO   (1 << 13)
+#define CMU2_HFPERCLKEN0_LETIMER0 (1 << 26)
 #define CMU2_HFPERCLKEN0_TIMER1 (1 << 6)
 
-#define CMU_HFCORECLKEN0_DMA (1 << 0)
+#define CMU2_HFCORECLKEN0_LE (1 << 4)
+#define CMU2_HFCORECLKEN0_DMA (1 << 0)
+
+#define CMU2_LFACLKEN0_LETIMER0 (1 << 2) 
+
+#define CMU2_LFCLKSEL_LFAE (1 << 16)
 
 // TIMER1
 
@@ -68,6 +77,28 @@
 #define TIMER1_IFC ((volatile uint32_t*)(TIMER1_BASE + 0x18))
 #define TIMER1_TOP ((volatile uint32_t*)(TIMER1_BASE + 0x1c))
 #define TIMER1_CNT ((volatile uint32_t*)(TIMER1_BASE + 0x24))
+
+// Low energy TIMER0
+#define LETIMER0_BASE 0x40082000
+
+#define LETIMER0_CTRL 	 	((volatile uint32_t*)(LETIMER0_BASE + 0x000)
+#define LETIMER0_CMD 	 	((volatile uint32_t*)(LETIMER0_BASE + 0x004)
+#define LETIMER0_STATUS 	((volatile uint32_t*)(LETIMER0_BASE + 0x008)
+#define LETIMER0_CNT 	 	((volatile uint32_t*)(LETIMER0_BASE + 0x00C)
+#define LETIMER0_COMP0 	 	((volatile uint32_t*)(LETIMER0_BASE + 0x010)
+#define LETIMER0_COMP1 	 	((volatile uint32_t*)(LETIMER0_BASE + 0x014)
+#define LETIMER0_REP0 	 	((volatile uint32_t*)(LETIMER0_BASE + 0x018)
+#define LETIMER0_REP1 	 	((volatile uint32_t*)(LETIMER0_BASE + 0x01C)
+#define LETIMER0_IF 	 	((volatile uint32_t*)(LETIMER0_BASE + 0x020)
+#define LETIMER0_IFS 	 	((volatile uint32_t*)(LETIMER0_BASE + 0x024)
+#define LETIMER0_IFC 	 	((volatile uint32_t*)(LETIMER0_BASE + 0x028)
+#define LETIMER0_IEN 	 	((volatile uint32_t*)(LETIMER0_BASE + 0x02C)
+#define LETIMER0_FREEZE 	((volatile uint32_t*)(LETIMER0_BASE + 0x030)
+#define LETIMER0_SYNCBUSY 	((volatile uint32_t*)(LETIMER0_BASE + 0x034)
+#define LETIMER0_ROUTE 	 	((volatile uint32_t*)(LETIMER0_BASE + 0x038)
+
+#define LETIMER0_CTRL_COMP0_TV (1 << 9)
+#define LETIMER0_CTRL_BUFMOD (1 << 2)
 
 // NVIC
 
