@@ -38,6 +38,10 @@ int main(void)
 
 void setupNVIC()
 {
+
+  *ISER0 |= ISER0_LETIMER0;
+  *ISER0 |= ISER0_GPIO_ODD;
+  *ISER0 |= ISER0_GPIO_EVEN;
   /* TODO use the NVIC ISERx registers to enable handling of interrupt(s)
      remember two things are necessary for interrupt handling:
       - the peripheral must generate an interrupt signal
