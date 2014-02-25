@@ -238,8 +238,10 @@ gpio_handler:
 	ldr r1, letimer0_base_address
 	mov r2, #2
 	str r2, [r1, #LETIMER0_CMD]
+	mov r2, #4
+	str r2, [r1, #LETIMER0_CMD]
 	//Start and clear letimer0
-	mov r2, #5
+	mov r2, #1
 	str r2, [r1, #LETIMER0_CMD]
 
 	
