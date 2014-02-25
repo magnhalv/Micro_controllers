@@ -53,6 +53,7 @@
 #define CMU_CMD          	((volatile uint32_t*)(CMU_BASE2 + 0x024))
 #define CMU_LFACLKEN0    	((volatile uint32_t*)(CMU_BASE2 + 0x058))
 #define CMU_LFCLKSEL		((volatile uint32_t*)(CMU_BASE2 + 0x028))
+#define CMU_LFAPRESC0		((volatile uint32_t*)(CMU_BASE2 + 0x068))
 
 
 #define CMU2_HFPERCLKEN0_DAC0   (1 << 17)
@@ -65,7 +66,8 @@
 
 #define CMU2_LFACLKEN0_LETIMER0 (1 << 2) 
 
-#define CMU2_LFCLKSEL_LFAE (1 << 16)
+#define CMU2_LFCLKSEL_ENABLE_ULFRCO (1 << 16)
+#define CMU2_LFCLKSEL_LFA_HFCORECLK (3)
 
 // TIMER1
 

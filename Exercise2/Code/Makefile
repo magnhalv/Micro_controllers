@@ -7,7 +7,7 @@ LD=arm-none-eabi-gcc
 OBJCOPY=arm-none-eabi-objcopy
 
 CFLAGS=-mcpu=cortex-m3 -mthumb -g -std=c99 -Wall
-LDFLAGS=-mcpu=cortex-m3 -mthumb -g -lgcc -lc -lcs3 -lcs3unhosted -lefm32gg -Llib
+LDFLAGS=-mcpu=cortex-m3 -mthumb -g -lgcc -lc -lcs3 -lcs3unhosted -lefm32gg -Llib -lm
 ASFLAGS=-mcpu=cortex-m3 -mthumb -g
 LINKERSCRIPT=lib/efm32gg.ld
 

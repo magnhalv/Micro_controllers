@@ -2,6 +2,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include "efm32gg.h"
+#include <math.h>
+
+#define PI 3.14159265
 
 void gpio_interrupt () {
 	*GPIO_IFC = 0xff;
@@ -18,9 +21,16 @@ void __attribute__ ((interrupt)) LETIMER0_IRQHandler()
 {  
 	// LEDS
 	*LETIMER0_REP0 = 0xff;
+	static float t = 0;
 	static uint32_t sound = 0;
-	sound += 200;
-	if (sound > 4095) sound = 0;  
+	t += 0.016;
+	sound += 67;
+	if (t > 1.0/440) {
+		t -= 1.0/440;
+		sound = 0;
+	}
+	
+	//uint32_t sound = 2048 + 2048*sin(440*2*PI*t);
 	
 	*LETIMER0_IFC = 0x1f;
   	*GPIO_PA_DOUT = *GPIO_PA_DOUT << 1;
