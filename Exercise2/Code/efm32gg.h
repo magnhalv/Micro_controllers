@@ -100,6 +100,8 @@
 
 #define LETIMER0_CTRL_COMP0_TV (1 << 9)
 #define LETIMER0_CTRL_ONESHOT 1
+#define LETIMER0_CTRL_BUFFERED 2
+#define LETIMER0_CTRL_DOUBLE 3
 
 #define LETIMER0_IEN_UF (1 << 2)
 
@@ -178,4 +180,5 @@
 #define SCR          ((volatile uint32_t*)0xe000ed10)
 #define SYSTICK_CTRL ((volatile uint32_t*)0xe000e010)
 #define SYSTICK_LOAD ((volatile uint32_t*)0xe000e014)
+
 

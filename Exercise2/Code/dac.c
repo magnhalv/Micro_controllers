@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <math.h>
+
 #include "efm32gg.h"
 
 void setupDAC() {
@@ -11,6 +13,7 @@ void setupDAC() {
 
 	*DAC0_CH0CTRL = 1;
 	*DAC0_CH1CTRL = 1;
+
 
 
 

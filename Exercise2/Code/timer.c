@@ -14,11 +14,11 @@ void setupTimer(uint16_t period)
     /* 14 MHz clk */
     *CMU_LFCLKSEL |= CMU2_LFCLKSEL_LFA_HFCORECLK; /* Set HFCORECLK/2 as source clk for LFACLK*/
     
-    /* 213 Hz */
+    /* 27 kHz */
     *CMU_LFAPRESC0 = 0x8 << 8;
 
     *LETIMER0_CTRL |= LETIMER0_CTRL_COMP0_TV; /* Set COMP0 as top value */
-    *LETIMER0_CTRL |= LETIMER0_CTRL_ONESHOT; /* Enable ONESHOT mode */
+    *LETIMER0_CTRL |= LETIMER0_CTRL_BUFFERED; /* Enable ONESHOT mode */
     
     /* Set default values */
     *LETIMER0_COMP0 = 1;
