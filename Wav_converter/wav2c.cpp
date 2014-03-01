@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 	strcpy(p, ".c");
 	FILE *fo = fopen(s, "wt");
 	if (!fo) { printf("Could not open output file!\n"); return -1; }
-
+	printf("lol\n");
 	fseek(fi, 0x28, SEEK_SET);
 	p = strrchr(s, '\\'); if (p) s = p+1;
 	p = strrchr(s, '/'); if (p) s = p+1;
