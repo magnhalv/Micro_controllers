@@ -4,7 +4,7 @@
 #include "efm32gg.h"
 
 /* function to setup the timer */
-void setupTimer(uint16_t period)
+void setupTimer()
 {
     *CMU_HFCORECLKEN0 |= CMU2_HFCORECLKEN0_LE; /* Enable LE clk */
     *CMU_LFACLKEN0 |= CMU2_LFACLKEN0_LETIMER0; /* Enable LETIMER0 clk */

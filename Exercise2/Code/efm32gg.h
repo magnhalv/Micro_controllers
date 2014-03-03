@@ -122,9 +122,10 @@
 #define IABR0 ((volatile uint32_t*)0xe000e300)
 #define IABR1 ((volatile uint32_t*)0xe000e304)
 
-#define ISER0_LETIMER0 (1 << 26)
+#define ISER0_LETIMER0 	(1 << 26)
 #define ISER0_GPIO_EVEN (1 << 1)
-#define ISER0_GPIO_ODD (1 << 11)
+#define ISER0_GPIO_ODD 	(1 << 11)
+#define ISER0_DMA		(1 << 0) 
 
 // IPR
 
