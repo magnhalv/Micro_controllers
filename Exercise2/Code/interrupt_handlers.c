@@ -2,7 +2,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include "efm32gg.h"
-#include <math.h>
+#include "game_over.h"
+#include "swtheme.h"
 
 
 #define TOP_AMP 256
@@ -14,7 +15,9 @@
 uint32_t nofTimes;
 uint32_t period_offset;
 uint32_t step;
-uint32_t sound;
+
+
+static uint32_t sample;
 
 void gpio_interrupt () {
 	
@@ -24,24 +27,35 @@ void gpio_interrupt () {
 	input_status = *GPIO_PC_DIN;
 	*GPIO_PA_DOUT = (input_status << 8) + 0xff;
 
-	input_status = ~input_status;
-	for (int i = 0; i < 8; i++) {
-		if (CHECK_BIT(input_status, i)) {
-			period_offset = i*8;
-		}
-	}
+	// input_status = ~input_status;
+	// for (int i = 0; i < 8; i++) {
+	// 	if (CHECK_BIT(input_status, i)) {
+	// 		period_offset = i*8;
+	// 	}
+	// }
 
-	*LETIMER0_REP0 = 0xff;
-	*LETIMER0_REP1 = 0xff;
 	*LETIMER0_CMD = 0x5;
 
 	nofTimes = LENGTH_OF_SOUND;
 	step = 512/((BASE_PERIOD - period_offset)/2);
-	sound = 512;
+	sample = 0;
+	*CMU_OSCENCMD |= CMU2_OSCENCMD_LFRCOEN_E; 
 }
 /* LETIMER0 interrupt handler */
 void __attribute__ ((interrupt)) LETIMER0_IRQHandler() 
 {  
+	*LETIMER0_IFC = 0x1f;
+	unsigned char sound = swtheme[sample];
+	sample++;
+	if (sound == 0) {
+		*LETIMER0_CMD = 1 << 1; //Stop timer. 
+		*CMU_OSCENCMD |= 0; //Disable LFRCO when sound is done playing. 
+	}
+	else {
+		*DAC0_CH0DATA = sound;
+  		*DAC0_CH1DATA = sound;
+  	}
+	/*
 	if (nofTimes != 0 && *LETIMER0_REP0 < 2) {
 		*LETIMER0_REP1 = 0xff;
 		nofTimes--;
@@ -65,6 +79,7 @@ void __attribute__ ((interrupt)) LETIMER0_IRQHandler()
   	// SOUND
   	*DAC0_CH0DATA = sound;
   	*DAC0_CH1DATA = sound;
+  	*/
 }
 
 
