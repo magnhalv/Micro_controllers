@@ -13,11 +13,11 @@ void setupTimer()
     //temp &= ~3; 
     //*CMU_LFCLKSEL = CMU2_LFCLKSEL_ENABLE_ULFRCO | temp; /* Set ULFRCO as source clk for LETIMER0 */
     
-    /* 14 MHz clk */
-    
+    /* 32 kHz clk */
+    *CMU_OSCENCMD |= CMU2_OSCENCMD_LFRCOEN_E;
     *CMU_LFCLKSEL |= CMU2_LFCLKSEL_LFA_LFRCO; /* Set LFRCO as source clk for LFACLK*/
 
-    /* 27 kHz */
+    /* 16 kHz */
     *CMU_LFAPRESC0 = 0x1 << 8;
 
     *LETIMER0_CTRL |= LETIMER0_CTRL_COMP0_TV; /* Set COMP0 as top value */
@@ -25,8 +25,19 @@ void setupTimer()
 
     /* Enable interrupt on underflow */
     *LETIMER0_IEN |= LETIMER0_IEN_UF;
+    *LETIMER0_CTRL |= LETIMER0_CTRL_PULSE;
+
+
    
 
+}
+
+void disableTimer() {
+    *CMU_HFCORECLKEN0 &= ~CMU2_HFCORECLKEN0_LE;
+    *CMU_LFACLKEN0 &= ~CMU2_LFACLKEN0_LETIMER0;
+    *LETIMER0_CMD = 1 << 1; //Stop timer. 
+    *CMU_OSCENCMD &= ~CMU2_OSCENCMD_LFRCOEN_E; //Disable LFRCO when sound is done playing. 
+    *LETIMER0_IEN = 0;
 }
 
 

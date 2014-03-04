@@ -106,6 +106,7 @@
 #define LETIMER0_CTRL_ONESHOT 1
 #define LETIMER0_CTRL_BUFFERED 2
 #define LETIMER0_CTRL_DOUBLE 3
+#define LETIMER0_CTRL_PULSE (2 << 4)
 
 #define LETIMER0_IEN_UF (1 << 2)
 
@@ -157,6 +158,8 @@
 #define DAC0_CH1DATA  ((volatile uint32_t*)(DAC0_BASE2 + 0x024))
 #define DAC0_COMBDATA ((volatile uint32_t*)(DAC0_BASE2 + 0x028))
 
+#define DAC_PRS_TRIGGER 1 << 2
+
 // DMA
 
 #define DMA_BASE 0x400c2000
@@ -179,6 +182,8 @@
 #define PRS_BASE 0x400cc000
 
 #define PRS_CH0_CTRL ((volatile uint32_t*)(PRS_BASE + 0x010))
+
+#define PRS_CTRL_LETIMER0 (0b110100 << 16)
 
 // System Control Block
 

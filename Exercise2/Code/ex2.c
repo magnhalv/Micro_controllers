@@ -15,7 +15,7 @@
 /* Declaration of peripheral setup functions */
 void setupTimer();
 void setupDAC();
-void setupNVIC();
+//void setupNVIC();
 void setupDMA();
 
 /* Your code will start executing here */
@@ -23,9 +23,8 @@ int main(void)
 {  
   /* Call the peripheral setup functions */
   setupGPIO();
-  setupDAC();
-  setupTimer();
-  setupDMA();
+  //setupDAC();
+  //setupDMA();
   /* Enable interrupt handling */
   setupNVIC();
   
@@ -34,7 +33,7 @@ int main(void)
   */
   *SCR |= 1 << 2; //Enable deep sleep mode
   *SCR |= 1 << 1; //Enable sleep after handling interrupt. 
-
+  //while (1) {__asm("WFI");}
   return 0;
 }
 
@@ -44,7 +43,6 @@ void setupNVIC()
   *ISER0 |= ISER0_LETIMER0;
   *ISER0 |= ISER0_GPIO_ODD;
   *ISER0 |= ISER0_GPIO_EVEN;
-  *ISER0 |= ISER0_DMA;
   /* TODO use the NVIC ISERx registers to enable handling of interrupt(s)
      remember two things are necessary for interrupt handling:
       - the peripheral must generate an interrupt signal
