@@ -33,11 +33,11 @@ void setupTimer()
 }
 
 void disableTimer() {
-    *CMU_HFCORECLKEN0 &= ~CMU2_HFCORECLKEN0_LE;
-    *CMU_LFACLKEN0 &= ~CMU2_LFACLKEN0_LETIMER0;
     *LETIMER0_CMD = 1 << 1; //Stop timer. 
     *CMU_OSCENCMD &= ~CMU2_OSCENCMD_LFRCOEN_E; //Disable LFRCO when sound is done playing. 
     *LETIMER0_IEN = 0;
+    //*CMU_HFCORECLKEN0 &= ~CMU2_HFCORECLKEN0_LE;
+    //*CMU_LFACLKEN0 &= ~CMU2_LFACLKEN0_LETIMER0;
 }
 
 

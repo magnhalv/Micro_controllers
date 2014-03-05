@@ -29,6 +29,7 @@ void gpio_interrupt () {
 	// }
 	setupDAC();
 	setupTimer();
+	sample = 0;
 	*LETIMER0_CMD = 0x5;
 	 
 }
