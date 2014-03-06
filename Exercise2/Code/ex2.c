@@ -13,28 +13,27 @@
 #define   SAMPLE_PERIOD   0
 
 /* Declaration of peripheral setup functions */
-void setupTimer(uint32_t period);
+void setupTimer();
 void setupDAC();
-void setupNVIC();
+//void setupNVIC();
+void setupDMA();
 
 /* Your code will start executing here */
 int main(void) 
 {  
   /* Call the peripheral setup functions */
   setupGPIO();
-  setupDAC();
-  setupTimer(SAMPLE_PERIOD);
-  
+  //setupDAC();
+  //setupDMA();
   /* Enable interrupt handling */
   setupNVIC();
   
   /* TODO for higher energy efficiency, sleep while waiting for interrupts
      instead of infinite loop for busy-waiting
   */
-  while(1) {
-    __asm("WFI");
-  }
-
+  *SCR |= 1 << 2; //Enable deep sleep mode
+  *SCR |= 1 << 1; //Enable sleep after handling interrupt. 
+  //while (1) {__asm("WFI");}
   return 0;
 }
 
