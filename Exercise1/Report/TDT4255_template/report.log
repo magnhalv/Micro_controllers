@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (MiKTeX 2.9) (preloaded format=pdflatex 2014.1.18)  10 FEB 2014 04:01
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (MiKTeX 2.9) (preloaded format=pdflatex 2014.1.18)  10 FEB 2014 04:43
 entering extended mode
 **D:/Github/Micro_controllers/Exercise1/Report/TDT4255_template/report.tex
 (D:/Github/Micro_controllers/Exercise1/Report/TDT4255_template/report.tex
@@ -215,17 +215,14 @@ File: ucsencs.def 2011/01/21 Fixes to fontencodings LGR, T3
 ] (D:\Github\Micro_controllers\Exercise1\Report\TDT4255_template\report.lof)
 \tf@lof=\write4
 
-(D:\Github\Micro_controllers\Exercise1\Report\TDT4255_template\report.lol)
-\tf@lol=\write5
-
 [3]
 (D:\Github\Micro_controllers\Exercise1\Report\TDT4255_template\introduction.tex
-<figures/placeholder.png, id=20, 450.18187pt x 334.24875pt>
-File: figures/placeholder.png Graphic file (type png)
+<figures/efm32gg.png, id=20, 371.88937pt x 499.8675pt>
+File: figures/efm32gg.png Graphic file (type png)
 
-<use figures/placeholder.png>
-Package pdftex.def Info: figures/placeholder.png used on input line 16.
-(pdftex.def)             Requested size: 256.0748pt x 190.13614pt.
+<use figures/efm32gg.png>
+Package pdftex.def Info: figures/efm32gg.png used on input line 16.
+(pdftex.def)             Requested size: 256.0748pt x 344.20723pt.
 
 (D:\Github\Micro_controllers\Exercise1\Report\TDT4255_template\Introduction/ass
 ignment.tex
@@ -235,10 +232,10 @@ File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 5.
- [4
+)) [4
 
- <D:/Github/Micro_controllers/Exercise1/Report/TDT4255_template/figures/placeho
-lder.png>])) [5]
+] [5 <D:/Github/Micro_controllers/Exercise1/Report/TDT4255_template/figures/efm
+32gg.png>]
 (D:\Github\Micro_controllers\Exercise1\Report\TDT4255_template\des_and_meth.tex
 
 Overfull \hbox (6.88951pt too wide) in paragraph at lines 33--34
@@ -304,10 +301,10 @@ ack.aux)
 (D:\Github\Micro_controllers\Exercise1\Report\TDT4255_template\references.aux))
  ) 
 Here is how much of TeX's memory you used:
- 3432 strings out of 493921
- 49337 string characters out of 3154497
+ 3428 strings out of 493921
+ 49163 string characters out of 3154497
  115606 words of memory out of 3000000
- 6653 multiletter control sequences out of 15000+200000
+ 6652 multiletter control sequences out of 15000+200000
  9369 words of font info for 34 fonts, out of 3000000 for 9000
  841 hyphenation exceptions out of 8191
  27i,6n,32p,638b,226s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -316,9 +313,9 @@ ublic/amsfonts/cm/cmbx12.pfb><D:/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pf
 b><D:/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><D:/MiKTeX/fonts/type1/pu
 blic/amsfonts/cm/cmr17.pfb><D:/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb
 ><D:/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb>
-Output written on report.pdf (14 pages, 137223 bytes).
+Output written on report.pdf (14 pages, 794405 bytes).
 PDF statistics:
- 79 PDF objects out of 1000 (max. 8388607)
+ 77 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  6 words of extra memory for PDF output out of 10000 (max. 10000000)
 
