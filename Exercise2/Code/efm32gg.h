@@ -106,9 +106,13 @@
 #define LETIMER0_CTRL_ONESHOT 1
 #define LETIMER0_CTRL_BUFFERED 2
 #define LETIMER0_CTRL_DOUBLE 3
-#define LETIMER0_CTRL_PULSE (2 << 4)
+#define LETIMER0_CTRL_TOGGLE_O0 (1 << 2)
+#define LETIMER0_CTRL_PULSE_O0 (2 << 2)
+#define LETIMER0_CTRL_PWM_O0 (3 << 2)
 
 #define LETIMER0_IEN_UF (1 << 2)
+
+#define LETIMER0_ROUTE_E_O0 1
 
 // NVIC
 
@@ -159,6 +163,7 @@
 #define DAC0_COMBDATA ((volatile uint32_t*)(DAC0_BASE2 + 0x028))
 
 #define DAC_PRS_TRIGGER 1 << 2
+#define DAC_ENABLE_CH	1
 
 // DMA
 
@@ -176,11 +181,16 @@
 #define DMA_IFC         ((volatile uint32_t*)(DMA_BASE + 0x1008))
 #define DMA_IEN         ((volatile uint32_t*)(DMA_BASE + 0x100c))
 #define DMA_CH0_CTRL    ((volatile uint32_t*)(DMA_BASE + 0x1100))
+#define DMA_CH1_CTRL 	((volatile uint32_t*)(DMA_BASE + 0x1104))
+
+#define DMA_CHn_CTRL_DAC0 0b001010 << 16
+#define DMA_CHn_CTRL_DAC0_CH1 
 
 // PRS
 
 #define PRS_BASE 0x400cc000
 
+#define PRS_SWPULSE  ((volatile uint32_t*)(PRS_BASE + 0x000))	
 #define PRS_CH0_CTRL ((volatile uint32_t*)(PRS_BASE + 0x010))
 
 #define PRS_CTRL_LETIMER0 (0b110100 << 16)

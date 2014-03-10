@@ -24,7 +24,7 @@ int main(void)
   /* Call the peripheral setup functions */
   setupGPIO();
   //setupDAC();
-  //setupDMA();
+  setupDMA();
   /* Enable interrupt handling */
   setupNVIC();
   
@@ -33,7 +33,7 @@ int main(void)
   */
   *SCR |= 1 << 2; //Enable deep sleep mode
   *SCR |= 1 << 1; //Enable sleep after handling interrupt. 
-  //while (1) {__asm("WFI");}
+  while (1) {}
   return 0;
 }
 
