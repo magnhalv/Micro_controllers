@@ -1,0 +1,83 @@
+\section{Description and Methodology}\label{chapter:Description and Methodology}
+This section covers how the assignment was solved. This was done in the following steps:
+
+\begin{itemize}
+	\item Setup General Purpose Input/Output and interrupt.  
+	\item Set up the Digital to Analog Converter (DAC).
+	\item Set up a timer to feed the DAC with sound samples. 
+	\item Create sound samples. 
+	\item Reduce the power consumed. 
+\end{itemize}
+
+
+\subsection{Setup General Purpose Input/Output and interrupt}
+
+Basically the same method that was used in the previous assignment was used here as well. 
+
+\begin{itemize}
+ 	\item 	Enable the general-purpose input/output (GPIO) clock gate, which was done by writing to the high frequency peripheral clock register (HFPERCLKEN0) in the clock manangement unit (CMU). 
+ 	\item 	Set high drive strength to port A, which controls the LEDs, by writing to the GPIO\_PA\_CTRL register.
+ 	\item 	Enable pin 8-15 in port A for output, by writing to the GPIO\_PA\_MODEH register.
+ 	\item 	Activate the LEDs by setting the register GPIO\_PA\_DOUT to low. 
+ 	\item Setting the input port for external interrupts to port C, by writing 0x22222222 to the GPIO\_EXTIPSELL register. 
+	\item Enable interrupts to happen when input pin 0-7 goes low (i.e. when a button is pressed down), by writing 0xff to GPIO\_EXITFALL. 
+	\item Enable interrupt generation on pin 0-7, by writing 0xff to GPIO\_IEN.
+	\item Enable the handlers in the exception vector table by writing 0x802 to the ISER0 registry.
+	\item Handle any GPIO interrupts by creating the C functions \_\_attribute\_\_ ((interrupt)) GPIO\_EVEN\_IRQHandler() and \_\_attribute\_\_ ((interrupt)) GPIO\_ODD\_IRQHandler().
+	\item Clear the interrupt by writing 0xff to GPIO\_IFC in the interrupt handler, so the interrupt handler will not be repeatedly called.
+\end{itemize}
+
+The listed steppes make the microcontroller generate a interrupt whenever a button is pushed, allowing us to set the DAC up for playing a sound. 
+
+\subsection{Set up the Digital to Analog Converter (DAC)}
+
+The DAC was very easily enabeled by the following steppes\cite{compendium}:
+
+\begin{itemize}
+	\item Enable the DAC clock gate by writing to HFPERCLKEN0. 
+	\item Prescale the DAC to 437.5 kHZ, and enable the DAC output to the amplifier by writing 0x50010 to the DAC control register.
+	\item Enable DAC0 channel 0 and 1 by setting their respective control registers to 1.  
+\end{itemize}
+
+We also created a function to turn off the DAC, when not playing sound, to save power. This was done by simply writing 0 to the mentioned registers, except for HFPERCLKEN0.
+
+This enabled the DAC, but in order to generate sound we have to feed it with a new sample thousands of times every second. For this we needed a timer.
+
+\subsection{Set up a timer to feed the DAC with sound samples}
+
+We decided to use the Low Energy Timer (LETIMER0) in this exercise too, in order to save power. We tried to use the 
+Ultra Low Freq. RC Osciliator this time too, but it provided too low sample rate (1 kHz). Thus we connected the LETIMER0 to the Low Freq. RC Osciliator (LFRCO), which runs at 32 kHz. The LETIMER0 also allows us to reduce the clock rate by
+writing to the CMU\_LFAPRESC0 register.
+
+The following steppes were preformed to setup the LETIMER0:
+
+\begin{itemize}
+	\item Enable the Low Energy clock gate by writing to the CMU\_HFCORECLKEN0 register.
+	\item Enable the LETIMER0 clock gate by writing to the CMU\_LFACLKEN0 register. 
+	\item  Enable LFRCO by writing to CMU\_OSCENCMD, and connect it to the LETIMER0 by writing
+	to the CMU\_LFCLKSEL register. 
+	\item Set COMP0 as top value (the value the timer starts at) and enable free mode in the LETIMER0\_CTRL register.
+	\item Write 1 to COMP0. 
+	\item Enable interrupt on underflow.  
+	\item Start the timer when a GPIO interrupt occurs. 
+\end{itemize}
+
+We also added a function to disable the LETIMER0 when we were not playing sound in order to save power, by simply disabling the LFRCO and interrupts. 
+
+This allowed us write a new sample to the DAC channels whenever a underflow occured, which meant we could generate a new sample at a rate of 32 kHz. Now we only needed samples.
+
+
+\subsection{Create sound samples}
+
+In order to create sound, we needed samples we could feed into the DAC. We did this by converting WAV sound files into 8 kHz, 8-bit WAV files, using a free program called Audacity\cite{audacity}. Afterwards we used a simple C++ program\cite{darkfader} to convert the WAV files to a C char array. The mentioned C++ program is among the deliverables. 
+
+With these char arrays, containing samples, available, generating sound was very simple. On GPIO interrupt we see which button was pressed, and setup the timer and the DAC to play the respective sound. We then simply fed the DAC with a new sample on every LETIMER0 interrupt from the respective sample array. 
+
+\subsection{Reduce the power consumed}
+
+As mentioned, we decided to use the LETIMER0 with the LFRCO in order to reduce power consumed. This allowed us to let the microcontroller to enter deep sleep (i.e. turn of the processor) in-between the underflow interrupts. We also turn off the DAC, the LETIMER0 and the LFRCO when sound is not played. In other words, the DAC and the LETIMER0 is set up in the GPIO interrupt handler, and disabled in the LETIMER0 interrupt handler when the end of the sample array is reached. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+

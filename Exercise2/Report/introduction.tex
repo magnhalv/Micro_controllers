@@ -1,0 +1,23 @@
+\section{Introduction}
+
+The components used in this assignement is the \textit{EFM32GG Giant Gecko microcontroller} combined with
+the \textit{ARM Cortex-M3 processor}, connected to a \textit{gamepad} containing eight LEDs and buttons. The programming
+is done in C and can be uploaded to the board by usb and a program called \textit{eACommander}. The processor supports the ARM Thumb-2 instruction set, which must be specified to the compiler. 
+
+The microcontroller is connected to the gamepad with a ribbon cable split into two parts, one for the buttons and one for the LEDs. The parts are connected to two different I/O ports on the microcontroller, port C and A, respectively. The buttons are connected to pin 0-7 on port C and the LEDs are connected to pin 8-15 on port A. 
+
+The DAC outputs sound to via the audio output, which can be listened to by connected a standard headset. 
+
+
+Both the micocontroller is designed to be highly energy efficient, and thus support five different energy modes. Energy mode 0 provides full peripheral availability, while energy mode 4 disables most of the peripherals but uses a lot less power. Thus, in order to save power, we wish to keep the microcontroller in as high energy mode as possible at all times. 
+
+We were provided with a framework which contained five C files and a header file containing useful constants, providing a simple LED program in C. The framework also contained a makefile which could be used to assemble, link and upload the code to the microcontroller. We were also provided with a compendium\cite{compendium}, containing useful information about the system, and reference guides\cite{cortex}\cite{efm32gg}.
+
+\begin{figure}[ht]
+    \centering
+      \includegraphics[width=9cm]{figures/efm32gg}
+    \caption{The EFM32GG microcontroller and gamepad\cite{compendium}}
+    \label{figure_ef32gg}
+\end{figure}
+
+\input{Introduction/assignment}

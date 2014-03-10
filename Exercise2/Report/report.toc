@@ -1,0 +1,14 @@
+\contentsline {section}{\numberline {1}Introduction}{4}
+\contentsline {subsection}{\numberline {1.1}Assignment}{4}
+\contentsline {section}{\numberline {2}Description and Methodology}{6}
+\contentsline {subsection}{\numberline {2.1}Setup General Purpose Input/Output and interrupt}{6}
+\contentsline {subsection}{\numberline {2.2}Set up the Digital to Analog Converter (DAC)}{7}
+\contentsline {subsection}{\numberline {2.3}Set up a timer to feed the DAC with sound samples}{7}
+\contentsline {subsection}{\numberline {2.4}Create sound samples}{8}
+\contentsline {subsection}{\numberline {2.5}Reduce the power consumed}{8}
+\contentsline {section}{\numberline {3}Results}{9}
+\contentsline {subsection}{\numberline {3.1}Result}{9}
+\contentsline {subsubsection}{\numberline {3.1.1}Functionality}{9}
+\contentsline {subsubsection}{\numberline {3.1.2}Power consumption}{9}
+\contentsline {subsection}{\numberline {3.2}Testing}{9}
+\contentsline {section}{\numberline {4}Conclusion}{10}
