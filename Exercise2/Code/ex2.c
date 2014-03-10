@@ -24,7 +24,7 @@ int main(void)
   /* Call the peripheral setup functions */
   setupGPIO();
   //setupDAC();
-  setupDMA();
+  //setupDMA();
   /* Enable interrupt handling */
   setupNVIC();
   
