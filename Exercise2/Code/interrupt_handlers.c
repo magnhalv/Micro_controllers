@@ -25,24 +25,25 @@ void gpio_interrupt () {
 	input_status = *GPIO_PC_DIN;
 	*GPIO_PA_DOUT = (input_status << 8) + 0xff;
 	uint32_t button_pressed = 0;
-	// input_status = ~input_status;
+
+	/* Check which button was pressed ,and play the respective sound */
 	for (int i = 0; i < 8; i++) {
 	 	if (CHECK_BIT(~input_status, i)) {
-	 		button_pressed = i;
+	 		button_pressed = i+1;
 	 	}
 	}
 	switch (button_pressed) {
-		case 0: 
+		case 1: 
 			sound_array = swtheme;
 			nofSamples = sizeof(swtheme);
 			div_clock = 1;
 			break;
-		case 1: 
+		case 2: 
 			sound_array = battle003;
 			nofSamples = sizeof(battle003);
 			div_clock = 0;
 			break;
-		case 2: 
+		case 3: 
 			sound_array = game_over;
 			nofSamples = sizeof(game_over);
 			div_clock = 1;
@@ -60,7 +61,7 @@ void gpio_interrupt () {
 /* LETIMER0 interrupt handler */
 void __attribute__ ((interrupt)) LETIMER0_IRQHandler() 
 {  
-	//*PRS_SWPULSE = 1;
+	//*PRS_SWPULSE = 1; 
 	*LETIMER0_IFC = 0x1f;
 	unsigned char sound = sound_array[sample];
 	sample++;
