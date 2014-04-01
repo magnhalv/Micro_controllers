@@ -9,10 +9,6 @@ void setupTimer(uint32_t div_clock)
     *CMU_HFCORECLKEN0 |= CMU2_HFCORECLKEN0_LE; /* Enable LE clk */
     *CMU_LFACLKEN0 |= CMU2_LFACLKEN0_LETIMER0; /* Enable LETIMER0 clk */
     
-    //uint32_t temp = *CMU_LFCLKSEL;
-    //temp &= ~3; 
-    //*CMU_LFCLKSEL = CMU2_LFCLKSEL_ENABLE_ULFRCO | temp; /* Set ULFRCO as source clk for LETIMER0 */
-    
     /* 32 kHz clk */
     *CMU_OSCENCMD |= CMU2_OSCENCMD_LFRCOEN_E;
     *CMU_LFCLKSEL |= CMU2_LFCLKSEL_LFA_LFRCO; /* Set LFRCO as source clk for LFACLK*/
@@ -25,6 +21,8 @@ void setupTimer(uint32_t div_clock)
 
     /* Enable interrupt on underflow */
     *LETIMER0_IEN |= LETIMER0_IEN_UF;
+
+    /* DMA attempt */
     // *LETIMER0_CTRL |= LETIMER0_CTRL_TOGGLE_O0;
     // *LETIMER0_CTRL |= 1 << 5;
     // *LETIMER0_ROUTE |= 3;
