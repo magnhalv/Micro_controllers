@@ -1,6 +1,8 @@
 #include <stdint.h>
 
 // GPIO
+#define GPIO_Px_LENGTH 0x24
+#define GPIO_I_LENGTH 0x1c
 
 #define GPIO_PA_BASE 0x40006000
 #define GPIO_PB_BASE 0x40006024
