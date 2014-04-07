@@ -1,8 +1,10 @@
-#include <stdint.h>
+#include <linux/types.h>
+
+#define REG_SIZE 0x4
 
 // GPIO
-#define GPIO_Px_LENGTH 0x24
-#define GPIO_I_LENGTH 0x1c
+#define GPIO_Px_MEM_LENGTH 0x24
+#define GPIO_I_MEM_LENGTH 0x1c
 
 #define GPIO_PA_BASE 0x40006000
 #define GPIO_PB_BASE 0x40006024
@@ -45,7 +47,8 @@
 #define GPIO_IEN       ((volatile uint32_t*)(GPIO_PA_BASE + 0x110))
 #define GPIO_IFC       ((volatile uint32_t*)(GPIO_PA_BASE + 0x11c))
 
-// CMU
+// CMUcd
+#define CMU_MEM_LENGTH 0x028
 
 #define CMU_BASE2 0x400c8000
 
