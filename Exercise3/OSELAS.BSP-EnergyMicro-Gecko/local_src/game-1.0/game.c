@@ -4,16 +4,41 @@
 #include <sys/mman.h>
 #include <linux/fb.h>
 #include <stdint.h>
+#include <signal.h>
+#include <fcntl.h>
 
+void input_handler ();
+static int i = 1;
 int main(int argc, char *argv[])
 {
-	printf("Hello World, I'm game!\n And I'm edited!\n");
+	printf("Hello World, I'm game!\n");
 	
-	int fd_dg;
-	fd_dg = open("/dev/driver-gamepad");
+	int fd_dg, oflags;
+	char buffer;
+	
+	fd_dg = open("/dev/driver-gamepad", O_RDWR);
 	if(fd_dg == -1) perror("Could not open driver-gamepad: \n");
+	
+	signal(SIGIO, &input_handler);
+	fcntl(fd_dg, F_SETOWN, getpid());
+	oflags = fcntl(fd_dg, F_GETFL);
+	fcntl(fd_dg, F_SETFL, oflags | FASYNC);
+	
+	read(fd_dg, &buffer, 1);
+	while(i){}	
 	close(fd_dg);
 
+	
+
+	exit(EXIT_SUCCESS);
+}
+
+void input_handler () {
+	printf("Input handler called in game.");
+	i = 0;
+}
+
+void write_framebuffer() {
 	// int i;
 	// int fd_fb;
 	// uint16_t *map_fb;
@@ -21,7 +46,7 @@ int main(int argc, char *argv[])
 	// size_t nofPixels;
 
 	// nofPixels = 320*240*2;
-	// fd_fb = open("/dev/fb0");
+	// fd_fb = open("/dev/fb0", O_RDWR);
 	// if (fd_fb == -1) {
 	// 	perror("Error opening file: /dev/fb0");
 	// 	exit(EXIT_FAILURE);
@@ -50,6 +75,4 @@ int main(int argc, char *argv[])
 	// }
 	// close(fd_fb);
 
-
-	exit(EXIT_SUCCESS);
 }
