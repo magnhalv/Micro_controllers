@@ -8,13 +8,14 @@
 #include <fcntl.h>
 
 void input_handler ();
-static int i = 1;
+static int fd_dg;
+char buffer;
+int i = 1;
 int main(int argc, char *argv[])
 {
 	printf("Hello World, I'm game!\n");
 	
-	int fd_dg, oflags;
-	char buffer;
+	int oflags;
 	
 	fd_dg = open("/dev/driver-gamepad", O_RDWR);
 	if(fd_dg == -1) perror("Could not open driver-gamepad: \n");
@@ -25,6 +26,7 @@ int main(int argc, char *argv[])
 	fcntl(fd_dg, F_SETFL, oflags | FASYNC);
 	
 	read(fd_dg, &buffer, 1);
+	printf("Buffer value: %d\n", buffer);
 	while(i){}	
 	close(fd_dg);
 
@@ -35,6 +37,9 @@ int main(int argc, char *argv[])
 
 void input_handler () {
 	printf("Input handler called in game.");
+	char buffer;
+	read(fd_dg, &buffer, 1);
+	printf("Buffer value: %d\n", buffer);
 	i = 0;
 }
 

@@ -13,6 +13,7 @@
 #include <linux/cdev.h>
 #include <linux/sched.h>
 #include <linux/poll.h>
+#include <linux/interrupt.h>
 #include "efm32gg.h"
 
 
@@ -30,10 +31,18 @@ static int gamepad_close(struct inode *inode, struct file *filp);
 static ssize_t gamepad_read (struct file *filp, char __user *buff, size_t count, loff_t *offp);
 static ssize_t gamepad_write (struct file *filp, const char __user *buff, size_t count, loff_t *offp);
 static int gamepad_fasync(int fd, struct file *filp, int mode);
+static irqreturn_t interrupt_handler (int irq, void *dev_id, struct pt_regs *regs);
 
 void write_gpio_output(uint32_t value);
 void enable_gpio_io(void);
+void enable_gpio_interrupt(void);
 
+
+
+const char *device_name = "driver-gamepad";
+static dev_t devno;
+static struct cdev gamepad_cdev;
+static struct class *cl;
 static struct fasync_struct *gamepad_fasync_t;
 static struct file_operations gamepad_fops = {
 	.owner = THIS_MODULE,
@@ -43,10 +52,6 @@ static struct file_operations gamepad_fops = {
 	.release = gamepad_close,
 	.fasync = gamepad_fasync,
 };
-const char *device_name = "driver-gamepad";
-static dev_t devno;
-static struct cdev gamepad_cdev;
-static struct class *cl;
 
 static int __init template_init(void)
 {		 
@@ -59,22 +64,23 @@ static int __init template_init(void)
 	device_create(cl, NULL, devno, NULL, device_name);
 	
 	if (request_mem_region((unsigned long)GPIO_PA_BASE, GPIO_Px_MEM_LENGTH, device_name) == NULL) {
-		printk(KERN_ALERT "Failed to obtain GPIO_PA memory region for:%s", device_name);
+		printk(KERN_ALERT "Failed to obtain GPIO_PA memory region for:%s\n", device_name);
 		return -1;
 	}
 	if (request_mem_region((unsigned long)GPIO_PC_BASE, GPIO_Px_MEM_LENGTH, device_name) == NULL) {
 		release_mem_region((unsigned long)GPIO_PA_BASE, GPIO_Px_MEM_LENGTH);
-		printk(KERN_ALERT "Failed to obtain GPIO_PB memory region for:%s", device_name);
+		printk(KERN_ALERT "Failed to obtain GPIO_PB memory region for:%s\n", device_name);
 		return -1;
 	}
 	if (request_mem_region((unsigned long)GPIO_EXTIPSELL, GPIO_I_MEM_LENGTH, device_name) == NULL) {
 		release_mem_region((unsigned long)GPIO_PA_BASE, GPIO_Px_MEM_LENGTH);
 		release_mem_region((unsigned long)GPIO_PC_BASE, GPIO_Px_MEM_LENGTH);
-		printk(KERN_ALERT "Failed to obtain GPIO interrupt memory region for:%s", device_name);
+		printk(KERN_ALERT "Failed to obtain GPIO interrupt memory region for:%s\n", device_name);
 		return -1;
 	}
 	
 	enable_gpio_io();
+	enable_gpio_interrupt();
 
 	
 
@@ -120,6 +126,9 @@ static void __exit template_cleanup(void)
 
 static int gamepad_open(struct inode *inode, struct file *filp) {
 	printk("Open was called for: %s\n", device_name);
+	if(request_irq(17, interrupt_handler, IRQF_DISABLED, device_name, NULL) < 0) {
+		printk(KERN_ALERT "Failed to enable interrupt for:%s\n", device_name);
+	}
 	
 	return 0;
 }
@@ -132,8 +141,10 @@ static int gamepad_close(struct inode *inode, struct file *filp) {
 
 static ssize_t gamepad_read (struct file *filp, char __user *buff, size_t count, loff_t *offp) {
 	printk("Read was called for: %s\n", device_name);
-	buff[0] = 'c';
-	kill_fasync(&gamepad_fasync_t, SIGIO, POLL_IN);
+	
+	void *gpio_pc_din_vaddr;
+	gpio_pc_din_vaddr = ioremap_nocache((unsigned long)GPIO_PC_DIN, REG_SIZE);
+	*buff = ioread8(gpio_pc_din_vaddr);
 	return 0;
 }
 static ssize_t gamepad_write (struct file *filp, const char __user *buff, size_t count, loff_t *offp) {
@@ -145,6 +156,16 @@ static int gamepad_fasync(int fd, struct file *filp, int mode) {
 	int ret_val = fasync_helper(fd, filp, mode, &gamepad_fasync_t);
 	if (ret_val < 0) return ret_val;
 	return 0;
+}
+
+static irqreturn_t interrupt_handler (int irq, void *dev_id, struct pt_regs *regs) {
+	void* gpio_ifc_vaddr;
+	
+	gpio_ifc_vaddr = ioremap_nocache((unsigned long)GPIO_IFC, REG_SIZE);
+	iowrite32(0xff, gpio_ifc_vaddr);
+	printk("Interrupt called in %s\n", device_name);
+	kill_fasync(&gamepad_fasync_t, SIGIO, POLL_IN);
+	return IRQ_HANDLED;
 }
 
 
@@ -162,7 +183,9 @@ void write_gpio_output(uint32_t value) {
 void enable_gpio_io(void){
 	void *gpio_pa_ctrl_vaddr, 
 		 *gpio_pa_modeh_vaddr, 
-		 *gpio_pa_dout_vaddr;
+		 *gpio_pa_dout_vaddr,
+		 *gpio_pc_model_vaddr,
+		 *gpio_pc_dout_vaddr;
 
 	/* Output */
 	gpio_pa_ctrl_vaddr = ioremap_nocache((unsigned long)GPIO_PA_CTRL, REG_SIZE);
@@ -174,7 +197,34 @@ void enable_gpio_io(void){
 	gpio_pa_dout_vaddr = ioremap_nocache((unsigned long)GPIO_PA_DOUT, REG_SIZE);
 	iowrite32(0x7000, gpio_pa_dout_vaddr); /* Make sure all LEDs are off. */
 
+
+
 	/* Enable input */
+	gpio_pc_model_vaddr = ioremap_nocache((unsigned long)GPIO_PC_MODEL, REG_SIZE);
+	iowrite32(0x33333333, gpio_pc_model_vaddr);
+
+	gpio_pc_dout_vaddr = ioremap_nocache((unsigned long)GPIO_PC_DOUT, REG_SIZE);
+	iowrite32(0xff, gpio_pc_dout_vaddr);
+}
+
+void enable_gpio_interrupt(void) {
+	void 	*gpio_extipsell_vaddr,
+			*gpio_extifall_vaddr,
+			*gpio_ien_vaddr;
+
+	gpio_extipsell_vaddr = ioremap_nocache((unsigned long)GPIO_EXTIPSELL, REG_SIZE);
+	iowrite32(0x22222222, gpio_extipsell_vaddr);
+
+	gpio_extifall_vaddr = ioremap_nocache((unsigned long)GPIO_EXTIFALL, REG_SIZE);
+	iowrite32(0xff, gpio_extifall_vaddr);
+
+	gpio_ien_vaddr = ioremap_nocache((unsigned long)GPIO_IEN, REG_SIZE);
+	iowrite32(0xff, gpio_ien_vaddr);
+	 //     /* Enable GPIO interrupt */
+ //     *GPIO_EXTIPSELL = 0x22222222;
+ //     *GPIO_EXTIFALL = 0xff;
+ //     *GPIO_IEN = 0xff;
+
 }
 /*********************/
 
