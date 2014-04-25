@@ -82,27 +82,6 @@ static int __init template_init(void)
 	enable_gpio_io();
 	enable_gpio_interrupt();
 
-	
-
-
-
-
-
-	// *CMU_HFPERCLKEN0 |= CMU2_HFPERCLKEN0_GPIO; /* enable GPIO clock*/
- //     /* Enable output */
- //  	*GPIO_PA_CTRL = 0x2;  /* set high drive strength */
- //  	*GPIO_PA_MODEH = 0x55555555; /* set pins A8-15 as output */
- //  	*GPIO_PA_DOUT = 0xff00;  turn off LEDs D4-D8 (LEDs are active low) 
- //     /* Enable input */
- //     *GPIO_PC_MODEL = 0x33333333;
- //     *GPIO_PC_DOUT = 0xff;
-
- //     /* Enable GPIO interrupt */
- //     *GPIO_EXTIPSELL = 0x22222222;
- //     *GPIO_EXTIFALL = 0xff;
- //     *GPIO_IEN = 0xff;
-
-
 	printk("Successfully initalized: %s.", device_name);
 	return 0;
 }
@@ -220,11 +199,6 @@ void enable_gpio_interrupt(void) {
 
 	gpio_ien_vaddr = ioremap_nocache((unsigned long)GPIO_IEN, REG_SIZE);
 	iowrite32(0xff, gpio_ien_vaddr);
-	 //     /* Enable GPIO interrupt */
- //     *GPIO_EXTIPSELL = 0x22222222;
- //     *GPIO_EXTIFALL = 0xff;
- //     *GPIO_IEN = 0xff;
-
 }
 /*********************/
 
