@@ -113,13 +113,11 @@ static int gamepad_open(struct inode *inode, struct file *filp) {
 }
 
 static int gamepad_close(struct inode *inode, struct file *filp) {
-	printk("Close was called for: %s\n", device_name);
 	gamepad_fasync(-1, filp, 0);
 	return 0;
 }
 
 static ssize_t gamepad_read (struct file *filp, char __user *buff, size_t count, loff_t *offp) {
-	printk("Read was called for: %s\n", device_name);
 	
 	void *gpio_pc_din_vaddr;
 	gpio_pc_din_vaddr = ioremap_nocache((unsigned long)GPIO_PC_DIN, REG_SIZE);
@@ -127,7 +125,6 @@ static ssize_t gamepad_read (struct file *filp, char __user *buff, size_t count,
 	return 0;
 }
 static ssize_t gamepad_write (struct file *filp, const char __user *buff, size_t count, loff_t *offp) {
-	printk("Write was called for: %s\n", device_name);
 	return 0;
 }
 
@@ -142,7 +139,6 @@ static irqreturn_t interrupt_handler (int irq, void *dev_id, struct pt_regs *reg
 	
 	gpio_ifc_vaddr = ioremap_nocache((unsigned long)GPIO_IFC, REG_SIZE);
 	iowrite32(0xff, gpio_ifc_vaddr);
-	printk("Interrupt called in %s\n", device_name);
 	kill_fasync(&gamepad_fasync_t, SIGIO, POLL_IN);
 	return IRQ_HANDLED;
 }

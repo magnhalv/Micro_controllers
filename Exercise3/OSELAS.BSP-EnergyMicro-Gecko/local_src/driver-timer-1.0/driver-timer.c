@@ -96,8 +96,8 @@ ssize_t timer_read (struct file *filp, char __user *buff, size_t count, loff_t *
 	return 0;
 }
 ssize_t timer_write (struct file *filp, const char __user *buff, size_t count, loff_t *offp) {
+	
 	msecs = ((uint16_t)(buff[1] << 8)) + buff[0];
-	printk("Timer write was called. Msecs: %d\n", msecs);
 	
 	int ret;
 	// my_timer.function, my_timer.data

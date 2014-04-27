@@ -28,7 +28,7 @@ void remove_astroid(int astroid);
 
 void write_to_timer(uint16_t msecs);
 
-int fd_dg, fd_fb, fd_timer;
+int fd_dg, fd_fb, fd_timer, fd_sound;
 uint16_t *map_fb;
 size_t nofPixels;
 
@@ -44,7 +44,7 @@ size_t nofPixels;
 #define ASTROID_INTERVAL 100
 #define ASTROID_WIDTH 10
 #define ASTROID_HEIGHT 10
-#define TIMER_INTERVAL 5
+#define TIMER_INTERVAL_MSECS 5
 #define MAX_NOF_ASTROIDS 10
 #define ASTROID_SPEED 1
 
@@ -90,8 +90,8 @@ int main(int argc, char *argv[])
 
 	framebuffer_init();
 	init_screen();
-	write_to_timer(TIMER_INTERVAL);
-	while(1);
+	write_to_timer(TIMER_INTERVAL_MSECS);
+	while(1) sleep(100);
 	framebuffer_cleanup();
 	close(fd_dg);
 	
@@ -99,6 +99,9 @@ int main(int argc, char *argv[])
 	exit(EXIT_SUCCESS);
 }
 
+/******************/
+/* Event handlers */
+/******************/
 void signal_handler () {
 	char timer_zero;
 	read(fd_timer, &timer_zero, 1);
@@ -118,7 +121,7 @@ void timer_handler () {
 		next_astroid = ASTROID_INTERVAL;
 	}
 	else next_astroid--;
-	write_to_timer(TIMER_INTERVAL);
+	write_to_timer(TIMER_INTERVAL_MSECS);
 }
 
 void button_handler () {
@@ -131,6 +134,10 @@ void button_handler () {
 		move_brick(1);
 	}
 }
+
+/*********************************/
+/* Framebuffer and initalization */
+/*********************************/
 
 void framebuffer_init() {
 
@@ -185,8 +192,13 @@ void framebuffer_cleanup() {
 	close(fd_fb);
 }
 
+/******************/
+/*    Brick       */
+/******************/
+
 void move_brick(int direction) {
 	int i,j;
+	/* Remove brick */
 	for (i = 0; i < BRICK_HEIGHT; i++) {
 		for (j = 0; j < BRICK_WIDTH; j++) {
 			map_fb[current_position+index(j,i)] = BACKGROUND_COLOUR;
@@ -194,6 +206,7 @@ void move_brick(int direction) {
 		}
 	}
 	current_position += direction*BRICK_SPEED;
+	/* Repaint at new position */
 	paint_brick();
 }
 
@@ -213,7 +226,9 @@ void paint_brick() {
 	ioctl(fd_fb,0x4680 ,&rect);
 }
 
-
+/******************/
+/*    Astroids    */
+/******************/
 
 void create_asteroid() {
 	int i, j;
@@ -264,8 +279,12 @@ void move_astroids() {
 			rect.height = ASTROID_HEIGHT+ASTROID_SPEED+2;
 			ioctl(fd_fb,0x4680 ,&rect);
 			astroid_positions[n].y += ASTROID_SPEED;
-			if (astroid_hit_brick(n)) remove_astroid(n);
+			if (astroid_hit_brick(n)) {
+				remove_astroid(n);
+				paint_brick();
+			} 
 			else if (astroid_hit_ground(n)) init_screen();
+
 		}
 	}
 }
@@ -297,11 +316,15 @@ void remove_astroid(int astroid) {
 	struct fb_copyarea rect;
 	rect.dx = x;
 	rect.dy = y;
-	rect.width = ASTROID_WIDTH+1;
+	rect.width = ASTROID_WIDTH+2;
 	rect.height = ASTROID_HEIGHT+1;
 	ioctl(fd_fb,0x4680 ,&rect);
 	astroid_positions[astroid].x = -1;
 }
+
+/******************/
+/* Help functions */
+/******************/
 
 int is_Nth_bit_set(unsigned char b, int n) {
 	return (1 << n) & b;
