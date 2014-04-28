@@ -1,0 +1,14 @@
+\contentsline {section}{\numberline {1}Abstract}{1}
+\contentsline {section}{\numberline {2}Introduction}{4}
+\contentsline {section}{\numberline {3}Description and Methodology}{6}
+\contentsline {subsection}{\numberline {3.1}Installing uClinux}{6}
+\contentsline {subsection}{\numberline {3.2}The Gamepad Driver}{6}
+\contentsline {subsection}{\numberline {3.3}The Timer Driver}{7}
+\contentsline {subsection}{\numberline {3.4}The Game}{9}
+\contentsline {subsection}{\numberline {3.5}The Sound Driver}{9}
+\contentsline {section}{\numberline {4}Results}{11}
+\contentsline {subsection}{\numberline {4.1}Result}{11}
+\contentsline {subsubsection}{\numberline {4.1.1}Functionality}{11}
+\contentsline {subsubsection}{\numberline {4.1.2}Power consumption}{11}
+\contentsline {subsection}{\numberline {4.2}Testing}{11}
+\contentsline {section}{\numberline {5}Conclusion}{12}

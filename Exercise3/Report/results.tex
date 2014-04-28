@@ -1,0 +1,47 @@
+\section{Results}\label{chapter:Results and Tests}
+
+This section covers the testing of the program, the resulting functionality of the program and its power consumption.
+
+\subsection{Result}
+
+\subsubsection{Functionality}
+
+The result of this assigment was a simple computer game where you are supposed to stop raining astroids from hitting the earth by moving a shield back and fourth. The game uses two working character device drivers to access a gamepad and kernel timers. Both timers have signal support to user applications, making it possible to make the game interrupt driven - reducing CPU usage and energy. 
+
+We tried implementing sound for the game, but we were unfortunately unable to do so. 
+
+\subsubsection{Power consumption}
+
+The following current measurement where made under the described conditions:  
+\begin{itemize}
+	\item The Linux kernel by itself runs at ~10.3 mA. 
+	\item Running the game with high performance (screen updating every 5 ms) with polling, cause it to use ~22 mA. 
+	\item When it is interrupt driven and sleeps when not handling interrupts, it runs at ~18 mA. 
+	\item If we rerender the whole screen, instead of only the parts that are neccessary, it uses ~31 mA, and runs really slow.
+	\item If we increase the screen update interval to 2000 ms, the game runs at ~10.5 mA. But this causes the performance to be unbearable. 
+	\item Setting the screen update interval to 50 ms, the game runs at ~12 mA, and the game performance is tolerable. 
+\end{itemize}
+	
+From these numbers we can see that the major design choices have been power efficient, especially making the game interrupt driven and only updating the neccessary parts of the screen. 
+
+We can also see that we have to make a choice between smooth and high performance gameplay, and energy efficiency. 
+
+ 
+
+
+
+\subsection{Testing}
+
+The testing of the program was either done manually (pressing buttons and
+observe the result) or with GDB. The general method was testing manually
+to see if the program did what we intended. If this failed, and there were no
+obvious reasons for this, we debugged with GDB by reading the values of critical
+registers.
+Power consumption was tested by reading the energy usage of the board,
+using the built-in energy meter.
+
+
+
+
+
+

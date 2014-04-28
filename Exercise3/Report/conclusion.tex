@@ -1,0 +1,20 @@
+\section{Conclusion}
+
+The assignment tasks were: 
+
+\begin{enumerate}
+	\item Configure and build the uClinux for the board.
+	\item Make a driver for the buttons. It should be implemented as a kernel module. You are
+	free to make the driver as you wish, but the minimum requirements are to support your
+	needs for the game to work.
+	\item Complete the game. Use the framebuffer driver for writing to the display. Use your own	driver for reading the status of the buttons.
+\end{enumerate}
+
+We can conclude that all of the tasks have been completed. In addition we made two more drivers in order to provide a better implementation. Two of the drivers also have support for signaling the user application. All of the drivers allocates resources dynamically and supports virtual memory, making them quite robust. 
+
+We were unfortunantly unable to implement the sound driver, but we still learned a lot by attempting to make it work. 
+
+The game may be a bit simple, and we wish we had more time to work on it, but it still illustrates how a user application can interact with device drivers. More importantly, it illustrates how an user application can interact with \emph{our} device drivers, and that they work. 
+
+All in all, it has been an interesting and highly educating assignment. 
+ 

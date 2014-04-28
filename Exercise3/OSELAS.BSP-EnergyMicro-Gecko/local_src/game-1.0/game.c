@@ -10,26 +10,26 @@
 #include <string.h>
 
 void signal_handler();
-void timer_handler();
-void button_handler ();
+void astroid_handler();
+void shield_handler ();
 void framebuffer_init();
 void framebuffer_cleanup();
 void init_screen();
 int is_Nth_bit_set(unsigned char b, int n);
-void move_brick(int direction);
-void paint_brick();
+void move_shield(int direction);
+void paint_shield(); 
 void create_asteroid();
 void move_astroids();
 int astroid_exists(int x_pos);
 int add_astroid(int x_pos);
-int astroid_hit_brick(int astroid);
+int astroid_hit_shield(int astroid);
 astroid_hit_ground(int astroid);
 void remove_astroid(int astroid);
 
 void write_to_timer(uint16_t msecs);
 
 int fd_dg, fd_fb, fd_timer, fd_sound;
-uint16_t *map_fb;
+uint16_t *map_fb; /* Frambuffer map */
 size_t nofPixels;
 
 /* Game variables */
@@ -37,10 +37,10 @@ size_t nofPixels;
 #define HEIGHT 240
 #define WIDTH 320
 #define index(x, y) (x)+(y*WIDTH) 
-#define BRICK_HEIGHT HEIGHT/16
-#define BRICK_WIDTH WIDTH/6
-#define BRICK_Y 210
-#define BRICK_SPEED 2
+#define SHIELD_HEIGHT HEIGHT/16
+#define SHIELD_WIDTH WIDTH/6
+#define SHIELD_Y 210
+#define SHIELD_SPEED 2
 #define ASTROID_INTERVAL 100
 #define ASTROID_WIDTH 10
 #define ASTROID_HEIGHT 10
@@ -49,7 +49,7 @@ size_t nofPixels;
 #define ASTROID_SPEED 1
 
 #define BACKGROUND_COLOUR 128
-#define BRICK_COLOUR -50
+#define SHIELD_COLOUR -50
 #define ASTROID_COLOUR -124
 
 typedef struct {
@@ -57,10 +57,10 @@ typedef struct {
 	int x;
 } Position;
 
-const int START_POSITION = index(WIDTH/2 - (BRICK_WIDTH/2), BRICK_Y);
+const int START_POSITION = index(WIDTH/2 - (SHIELD_WIDTH/2), SHIELD_Y); /* Start pos of the shield */
 Position astroid_positions[MAX_NOF_ASTROIDS];
-int current_position;
-int next_astroid;
+int current_position; /* Current shield position */
+int next_astroid; /* Nof intervals left before new astroid */
 
 
 int main(int argc, char *argv[])
@@ -74,16 +74,14 @@ int main(int argc, char *argv[])
 		perror("Could not open driver-gamepad: \n");
 		exit(EXIT_FAILURE);
 	}	
-	signal(SIGIO, &signal_handler);
-	fcntl(fd_dg, F_SETOWN, getpid());
-	oflags_dg = fcntl(fd_dg, F_GETFL);
-	fcntl(fd_dg, F_SETFL, oflags_dg | FASYNC);
+	
 
 	fd_timer = open("/dev/driver-timer", O_RDWR);
 	if(fd_dg == -1) {
 		perror("Could not open driver-gamepad: \n");
 		exit(EXIT_FAILURE);
 	}	
+	signal(SIGIO, &signal_handler);
 	fcntl(fd_timer, F_SETOWN, getpid());
 	oflags_timer = fcntl(fd_timer, F_GETFL);
 	fcntl(fd_timer, F_SETFL, oflags_timer | FASYNC);
@@ -94,6 +92,7 @@ int main(int argc, char *argv[])
 	while(1) sleep(100);
 	framebuffer_cleanup();
 	close(fd_dg);
+	close(fd_timer);
 	
 
 	exit(EXIT_SUCCESS);
@@ -103,18 +102,11 @@ int main(int argc, char *argv[])
 /* Event handlers */
 /******************/
 void signal_handler () {
-	char timer_zero;
-	read(fd_timer, &timer_zero, 1);
-	if (timer_zero) {
-		timer_handler();
-	}
-	else {
-		//button_handler();
-	}
+	astroid_handler();
+	shield_handler();
 }
 
-void timer_handler () {
-	button_handler();
+void astroid_handler () {
 	move_astroids();
 	if (next_astroid == 0) {
 		create_asteroid();
@@ -124,14 +116,14 @@ void timer_handler () {
 	write_to_timer(TIMER_INTERVAL_MSECS);
 }
 
-void button_handler () {
+void shield_handler () {
 	char button_status;	
 	read(fd_dg, &button_status, 1);
 	if(!is_Nth_bit_set(button_status, 0)) {
-		move_brick(-1);
+		move_shield(-1);
 	}
 	else if (!is_Nth_bit_set(button_status, 2)) {
-		move_brick(1);
+		move_shield(1);
 	}
 }
 
@@ -164,13 +156,11 @@ void init_screen() {
 	for (i = 0; i < HEIGHT; i++) {
 		for (j = 0; j < WIDTH; j++) {
 			map_fb[index(j,i)] = BACKGROUND_COLOUR;
-			map_fb[index(j,i)+1] = BACKGROUND_COLOUR;
 		}
 	}
-	for (i = 0; i < BRICK_HEIGHT; i++) {
-		for (j = 0; j < BRICK_WIDTH; j++) {
-			map_fb[START_POSITION+index(j,i)] = BRICK_COLOUR;
-			map_fb[START_POSITION+index(j,i)+1] = BRICK_COLOUR;
+	for (i = 0; i < SHIELD_HEIGHT; i++) {
+		for (j = 0; j < SHIELD_WIDTH; j++) {
+			map_fb[START_POSITION+index(j,i)] = SHIELD_COLOUR;
 		}
 	}
 
@@ -193,36 +183,36 @@ void framebuffer_cleanup() {
 }
 
 /******************/
-/*    Brick       */
+/*    Shield      */
 /******************/
 
-void move_brick(int direction) {
+void move_shield(int direction) {
 	int i,j;
-	/* Remove brick */
-	for (i = 0; i < BRICK_HEIGHT; i++) {
-		for (j = 0; j < BRICK_WIDTH; j++) {
+	/* Remove shield */
+	for (i = 0; i < SHIELD_HEIGHT; i++) {
+		for (j = 0; j < SHIELD_WIDTH; j++) {
 			map_fb[current_position+index(j,i)] = BACKGROUND_COLOUR;
 			map_fb[current_position+index(j,i)+1] = BACKGROUND_COLOUR;
 		}
 	}
-	current_position += direction*BRICK_SPEED;
+	current_position += direction*SHIELD_SPEED;
 	/* Repaint at new position */
-	paint_brick();
+	paint_shield();
 }
 
-void paint_brick() {
+void paint_shield() {
 	int i,j;
-	for (i = 0; i < BRICK_HEIGHT; i++) {
-		for (j = 0; j < BRICK_WIDTH; j++) {
-			map_fb[current_position+index(j,i)] = BRICK_COLOUR;
-			map_fb[current_position+index(j,i)+1] = BRICK_COLOUR;
+	for (i = 0; i < SHIELD_HEIGHT; i++) {
+		for (j = 0; j < SHIELD_WIDTH; j++) {
+			map_fb[current_position+index(j,i)] = SHIELD_COLOUR;
+			map_fb[current_position+index(j,i)+1] = SHIELD_COLOUR;
 		}
 	}
 	struct fb_copyarea rect;
 	rect.dx = (current_position%WIDTH)-5;
-	rect.dy = BRICK_Y;
-	rect.width = BRICK_WIDTH+11;
-	rect.height = BRICK_HEIGHT+1;
+	rect.dy = SHIELD_Y;
+	rect.width = SHIELD_WIDTH+11;
+	rect.height = SHIELD_HEIGHT+1;
 	ioctl(fd_fb,0x4680 ,&rect);
 }
 
@@ -279,9 +269,9 @@ void move_astroids() {
 			rect.height = ASTROID_HEIGHT+ASTROID_SPEED+2;
 			ioctl(fd_fb,0x4680 ,&rect);
 			astroid_positions[n].y += ASTROID_SPEED;
-			if (astroid_hit_brick(n)) {
+			if (astroid_hit_shield(n)) {
 				remove_astroid(n);
-				paint_brick();
+				paint_shield();
 			} 
 			else if (astroid_hit_ground(n)) init_screen();
 
@@ -289,11 +279,11 @@ void move_astroids() {
 	}
 }
 
-int astroid_hit_brick(int astroid) {
+int astroid_hit_shield(int astroid) {
 	int x, y;
 	x = astroid_positions[astroid].x;
 	y = astroid_positions[astroid].y;
-	return (y + ASTROID_HEIGHT >= BRICK_Y) && (x >= current_position%WIDTH && x <= (current_position%WIDTH)+BRICK_WIDTH);
+	return (y + ASTROID_HEIGHT >= SHIELD_Y) && (x >= current_position%WIDTH && x <= (current_position%WIDTH)+SHIELD_WIDTH);
 
 }
 

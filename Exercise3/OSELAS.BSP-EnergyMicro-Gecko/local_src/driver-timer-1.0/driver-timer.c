@@ -16,16 +16,6 @@
 #include <linux/poll.h>
 #include <linux/interrupt.h>
 
-/*
- * template_init - function to insert this module into kernel space
- *
- * This is the first of two exported functions to handle inserting this
- * code into a running kernel
- *
- * Returns 0 if successfull, otherwise -1
- */
-
-
 int timer_open(struct inode *inode, struct file *filep);
 int timer_close(struct inode *inode, struct file *filep);
 ssize_t timer_read (struct file *filp, char __user *buff, size_t count, loff_t *offp);
@@ -100,7 +90,6 @@ ssize_t timer_write (struct file *filp, const char __user *buff, size_t count, l
 	msecs = ((uint16_t)(buff[1] << 8)) + buff[0];
 	
 	int ret;
-	// my_timer.function, my_timer.data
 	ret = mod_timer( &my_timer, jiffies + msecs_to_jiffies(msecs) );
 	if (ret) printk("Error in mod_timer\n");
 	return 0;

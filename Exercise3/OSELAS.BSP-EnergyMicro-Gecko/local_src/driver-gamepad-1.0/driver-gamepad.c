@@ -29,7 +29,6 @@
 static int gamepad_open(struct inode *inode, struct file *filp);
 static int gamepad_close(struct inode *inode, struct file *filp);
 static ssize_t gamepad_read (struct file *filp, char __user *buff, size_t count, loff_t *offp);
-static ssize_t gamepad_write (struct file *filp, const char __user *buff, size_t count, loff_t *offp);
 static int gamepad_fasync(int fd, struct file *filp, int mode);
 static irqreturn_t interrupt_handler (int irq, void *dev_id, struct pt_regs *regs);
 
@@ -47,7 +46,6 @@ static struct fasync_struct *gamepad_fasync_t;
 static struct file_operations gamepad_fops = {
 	.owner = THIS_MODULE,
 	.read = gamepad_read,
-	.write = gamepad_write,
 	.open = gamepad_open,
 	.release = gamepad_close,
 	.fasync = gamepad_fasync,
@@ -122,9 +120,6 @@ static ssize_t gamepad_read (struct file *filp, char __user *buff, size_t count,
 	void *gpio_pc_din_vaddr;
 	gpio_pc_din_vaddr = ioremap_nocache((unsigned long)GPIO_PC_DIN, REG_SIZE);
 	*buff = ioread8(gpio_pc_din_vaddr);
-	return 0;
-}
-static ssize_t gamepad_write (struct file *filp, const char __user *buff, size_t count, loff_t *offp) {
 	return 0;
 }
 
